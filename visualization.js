@@ -5,12 +5,12 @@ function drawHeightmapVisualization() {
   if (heightmap === undefined) {
     fill(150);
     textAlign(CENTER, CENTER);
-    text("Generate a heightmap to start", params.canvasWidth / 2 - 250, params.canvasHeight / 2);
+    text("Generate a heightmap to start", params.canvasWidth / 2 - params.uiPanelWidth, params.canvasHeight / 2);
     return;
   }
 
   const viewHeight = params.canvasHeight - 2 * params.sideViewPadding;
-  const viewWidth = params.canvasWidth - 2 * params.sideViewPadding - 250;
+  const viewWidth = params.canvasWidth - params.uiPanelWidth - 2 * params.sideViewPadding;
   const pointSpacing = viewWidth / (heightmap.length - 1);
 
   // Draw background for visualization area
@@ -52,8 +52,8 @@ function drawHeightmapVisualization() {
 }
 
 function updateHoveredIndexFromMouse(pointSpacing, viewHeight, viewWidth) {
-  // Account for the 250px translate offset in draw()
-  const adjustedMouseX = mouseX - 250;
+  // Account for the UI panel offset (already translated, so relative to visualization area)
+  const adjustedMouseX = mouseX - params.uiPanelWidth;
   
   // Find closest point x-wise within the visualization area
   const minX = params.sideViewPadding;

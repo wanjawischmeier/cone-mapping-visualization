@@ -2,8 +2,13 @@
 // PARAMETERS & CONFIGURATION
 // ============================================================================
 let params = {
-  canvasWidth: 1000,
-  canvasHeight: 600,
+  get canvasWidth() {
+    return window.innerWidth;
+  },
+  get canvasHeight() {
+    return window.innerHeight;
+  },
+  uiPanelWidth: 220,
   heightmapResolution: 25,
   heightmapScale: 60,
   pointSize: 8,

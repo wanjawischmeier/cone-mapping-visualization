@@ -1,40 +1,49 @@
 // ============================================================================
 // UI PANEL
 // ============================================================================
-let uiPanelX = 10;
-let uiPanelY = 10;
-let uiPanelWidth = 220;
-let currentUIY = uiPanelY + 20;
-
 function createUIPanel() {
   // This is handled in drawUIPanel for dynamic layout
 }
 
 function drawUIPanel() {
+  const uiPanelX = 0;
+  const uiPanelY = 0;
+  let currentUIY = 25;
+  
   fill(220);
   stroke(100);
   strokeWeight(1);
-  rect(uiPanelX, uiPanelY, uiPanelWidth, params.canvasHeight - 20);
+  rect(uiPanelX, uiPanelY, params.uiPanelWidth, params.canvasHeight);
   
   fill(0);
   textSize(14);
   textAlign(LEFT);
   textStyle(BOLD);
-  text("CONTROLS", uiPanelX + 10, uiPanelY + 25);
+  text("CONTROLS", uiPanelX + 10, uiPanelY + 15);
   textStyle(NORMAL);
   
-  currentUIY = uiPanelY + 50;
+  currentUIY = 50;
   
   // Generate Heightmap Button
-  if (drawButton("Generate Heightmap", uiPanelX + 10, currentUIY, 200, 30)) {
+  if (drawButton("Generate Heightmap", uiPanelX + 10, currentUIY, params.uiPanelWidth - 20, 30)) {
     generateRandomHeightmap();
   }
   currentUIY += 50;
   
   // Generate Cone Map Button
-  if (drawButton("Generate Cone Map", uiPanelX + 10, currentUIY, 200, 30)) {
+  if (drawButton("Generate Cone Map", uiPanelX + 10, currentUIY, params.uiPanelWidth - 20, 30)) {
     generateConeMap();
   }
+  
+  // Cone map status indicator
+  let coneMapStatus = coneMap !== undefined ? "✓ Ready" : "✗ Not Generated";
+  let statusColor = coneMap !== undefined ? [0, 150, 0] : [150, 0, 0];
+  fill(...statusColor);
+  textSize(10);
+  textAlign(RIGHT);
+  text(coneMapStatus, uiPanelX + params.uiPanelWidth - 10, currentUIY + 40);
+  textAlign(LEFT);
+  
   currentUIY += 50;
   
   // Toggle Ray visibility
@@ -58,19 +67,22 @@ function drawUIPanel() {
   textSize(10);
   
   // Sliders
-  currentUIY = drawSlider("Resolution:", params.heightmapResolution, 10, 100, uiPanelX + 10, currentUIY, 200, (val) => {
-    params.heightmapResolution = val;
+  const sliderWidth = params.uiPanelWidth - 20;
+  currentUIY = drawSlider("Resolution:", params.heightmapResolution, 10, 100, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
+    params.heightmapResolution = Math.floor(val);
+    heightmap = undefined;
+    coneMap = undefined;
   });
   
-  currentUIY = drawSlider("Height Scale:", params.heightmapScale, 10, 200, uiPanelX + 10, currentUIY, 200, (val) => {
+  currentUIY = drawSlider("Height Scale:", params.heightmapScale, 10, 200, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
     params.heightmapScale = val;
   });
   
-  currentUIY = drawSlider("Point Size:", params.pointSize, 3, 15, uiPanelX + 10, currentUIY, 200, (val) => {
+  currentUIY = drawSlider("Point Size:", params.pointSize, 3, 15, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
     params.pointSize = val;
   });
   
-  currentUIY = drawSlider("Line Weight:", params.lineWeight, 1, 5, uiPanelX + 10, currentUIY, 200, (val) => {
+  currentUIY = drawSlider("Line Weight:", params.lineWeight, 1, 5, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
     params.lineWeight = val;
   });
 }

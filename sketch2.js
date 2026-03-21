@@ -4,6 +4,9 @@
 function setup() {
   createCanvas(params.canvasWidth, params.canvasHeight);
   createUIPanel();
+  
+  // Generate initial heightmap
+  generateRandomHeightmap();
 }
 
 function draw() {
@@ -11,7 +14,7 @@ function draw() {
   
   // Draw main visualization area
   push();
-  translate(250, 0);
+  translate(params.uiPanelWidth, 0);
   drawHeightmapVisualization();
   pop();
   
@@ -19,9 +22,13 @@ function draw() {
   drawUIPanel();
 }
 
+function windowResized() {
+  resizeCanvas(params.canvasWidth, params.canvasHeight);
+}
+
 function mouseDragged() {
-  // Check if dragging a ray point (accounting for the 250px translate)
-  const adjustedMouseX = mouseX - 250;
+  // Check if dragging a ray point (accounting for the UI panel offset)
+  const adjustedMouseX = mouseX - params.uiPanelWidth;
   const dragRadius = 16;
   
   // Check if we should start dragging
@@ -35,7 +42,7 @@ function mouseDragged() {
   
   // Calculate visualization bounds
   const viewHeight = params.canvasHeight - 2 * params.sideViewPadding;
-  const viewWidth = params.canvasWidth - 2 * params.sideViewPadding - 250;
+  const viewWidth = params.canvasWidth - params.uiPanelWidth - 2 * params.sideViewPadding;
   const minX = params.sideViewPadding;
   const maxX = params.sideViewPadding + viewWidth;
   const minY = params.sideViewPadding;
