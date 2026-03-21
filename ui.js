@@ -99,6 +99,13 @@ function drawUIPanel() {
   currentUIY = drawSlider("Line Weight:", params.lineWeight, 1, 5, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
     params.lineWeight = val;
   });
+  
+  currentUIY = drawSlider("Max Iterations (n):", params.rayIterations, 1, 50, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
+    params.rayIterations = Math.floor(val);
+    if (currentIteration > params.rayIterations) {
+      currentIteration = params.rayIterations;
+    }
+  });
 }
 
 function drawButton(label, x, y, w, h) {

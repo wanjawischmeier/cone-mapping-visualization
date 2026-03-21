@@ -64,3 +64,44 @@ function mouseDragged() {
 function mouseReleased() {
   draggingRayPoint = -1;
 }
+
+function mouseWheel(event) {
+  // Mouse wheel to change iteration
+  const viewHeight = params.canvasHeight - 2 * params.sideViewPadding;
+  const viewWidth = params.canvasWidth - params.uiPanelWidth - 2 * params.sideViewPadding;
+  const adjustedMouseX = mouseX - params.uiPanelWidth;
+  const minX = params.sideViewPadding;
+  const maxX = params.sideViewPadding + viewWidth;
+  const minY = params.sideViewPadding;
+  const maxY = params.sideViewPadding + viewHeight;
+  
+  // Check if mouse is over heightmap visualization area
+  if (adjustedMouseX >= minX && adjustedMouseX <= maxX && mouseY >= minY && mouseY <= maxY) {
+    if (event.delta > 0) {
+      currentIteration = Math.max(0, currentIteration - 1);
+    } else {
+      currentIteration = Math.min(params.rayIterations - 1, currentIteration + 1);
+    }
+    event.preventDefault();
+    return false;
+  }
+}
+
+function mousePressed() {
+  // Left-click in heightmap area to reset to n-1
+  const viewHeight = params.canvasHeight - 2 * params.sideViewPadding;
+  const viewWidth = params.canvasWidth - params.uiPanelWidth - 2 * params.sideViewPadding;
+  const adjustedMouseX = mouseX - params.uiPanelWidth;
+  const minX = params.sideViewPadding;
+  const maxX = params.sideViewPadding + viewWidth;
+  const minY = params.sideViewPadding;
+  const maxY = params.sideViewPadding + viewHeight;
+  
+  // Check if mouse is over heightmap visualization area and not dragging ray
+  if (adjustedMouseX >= minX && adjustedMouseX <= maxX && mouseY >= minY && mouseY <= maxY) {
+    if (draggingRayPoint === -1) {
+      currentIteration = params.rayIterations - 1;
+      return false;
+    }
+  }
+}

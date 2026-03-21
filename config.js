@@ -15,4 +15,5 @@ let params = {
   lineWeight: 2,
   sideViewPadding: 50,
   coneColorIntensity: 0.5,
+  rayIterations: 10,
 };

@@ -77,10 +77,15 @@ function rayInfiniteLineIntersection(rayX1, rayY1, rayX2, rayY2, lineX, lineY, l
   const t = (lineSlope * (rayX1 - lineX) - (rayY1 - lineY)) / denom;
   
   // Only accept intersections along the ray direction (t > 0)
-  if (t < 0) return null;
+  // We use a small epsilon to avoid floating point precision issues near the origin
+  if (t < -0.0001) return null;
   
   const ix = rayX1 + t * rayDx;
   const iy = rayY1 + t * rayDy;
+  
+  // Only return intersection if it's on the upward expanding part of the cone
+  // Y goes down in canvas, so smaller Y means higher up
+  if (iy > lineY + 0.1) return null;
   
   return { x: ix, y: iy };
 }
