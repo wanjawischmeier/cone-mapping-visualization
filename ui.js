@@ -1,6 +1,14 @@
 // ============================================================================
 // UI PANEL
 // ============================================================================
+// Helper: Detect if mouse clicked (transition from not pressed to pressed)
+function isMouseClicked(x, y, w, h) {
+  const isHovering = mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h;
+  const wasPressed = prevMousePressed;
+  const isPressed = mouseIsPressed;
+  return isHovering && isPressed && !wasPressed;
+}
+
 function createUIPanel() {
   // This is handled in drawUIPanel for dynamic layout
 }
@@ -16,6 +24,7 @@ function drawUIPanel() {
   rect(uiPanelX, uiPanelY, params.uiPanelWidth, params.canvasHeight);
   
   fill(0);
+  noStroke();
   textSize(14);
   textAlign(LEFT);
   textStyle(BOLD);
@@ -25,20 +34,23 @@ function drawUIPanel() {
   currentUIY = 50;
   
   // Generate Heightmap Button
-  if (drawButton("Generate Heightmap", uiPanelX + 10, currentUIY, params.uiPanelWidth - 20, 30)) {
+  if (isMouseClicked(uiPanelX + 10, currentUIY, params.uiPanelWidth - 20, 30)) {
     generateRandomHeightmap();
   }
+  drawButton("Generate Heightmap", uiPanelX + 10, currentUIY, params.uiPanelWidth - 20, 30);
   currentUIY += 50;
   
   // Generate Cone Map Button
-  if (drawButton("Generate Cone Map", uiPanelX + 10, currentUIY, params.uiPanelWidth - 20, 30)) {
+  if (isMouseClicked(uiPanelX + 10, currentUIY, params.uiPanelWidth - 20, 30)) {
     generateConeMap();
   }
+  drawButton("Generate Cone Map", uiPanelX + 10, currentUIY, params.uiPanelWidth - 20, 30);
   
   // Cone map status indicator
   let coneMapStatus = coneMap !== undefined ? "✓ Ready" : "✗ Not Generated";
   let statusColor = coneMap !== undefined ? [0, 150, 0] : [150, 0, 0];
   fill(...statusColor);
+  noStroke();
   textSize(10);
   textAlign(RIGHT);
   text(coneMapStatus, uiPanelX + params.uiPanelWidth - 10, currentUIY + 40);
@@ -58,12 +70,14 @@ function drawUIPanel() {
   }
   currentUIY += 50;
   
+  fill(0);
+  noStroke();
   textSize(11);
   textStyle(BOLD);
   text("Parameters:", uiPanelX + 10, currentUIY);
+  textStyle(NORMAL);
   currentUIY += 20;
   
-  textStyle(NORMAL);
   textSize(10);
   
   // Sliders
@@ -96,6 +110,7 @@ function drawButton(label, x, y, w, h) {
   rect(x, y, w, h);
   
   fill(255);
+  noStroke();
   textSize(12);
   textAlign(CENTER, CENTER);
   textStyle(BOLD);
@@ -125,19 +140,20 @@ function drawCheckbox(label, isChecked, x, y) {
   
   // Draw label
   fill(0);
+  noStroke();
   textSize(11);
   textAlign(LEFT, CENTER);
   textStyle(NORMAL);
   text(label, labelX, y + boxSize / 2);
   
-  // Check for click
-  let isHovering = mouseX > x && mouseX < x + boxSize && mouseY > y && mouseY < y + boxSize;
-  return isHovering && mouseIsPressed;
+  // Check for click (only on click, not continuous press)
+  return isMouseClicked(x, y, boxSize, boxSize);
 }
 
 function drawSlider(label, value, min, max, x, y, w, callback) {
   // Label
   fill(0);
+  noStroke();
   textSize(10);
   textAlign(LEFT);
   text(label, x, y);
@@ -159,10 +175,12 @@ function drawSlider(label, value, min, max, x, y, w, callback) {
   }
   
   fill(100);
+  noStroke();
   circle(thumbX, sliderY + 4, 12);
   
   // Value display
   fill(0);
+  noStroke();
   textSize(9);
   textAlign(RIGHT);
   text(value.toFixed(1), x + w, y);

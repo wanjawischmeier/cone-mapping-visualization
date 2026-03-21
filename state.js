@@ -16,3 +16,4 @@ let uiState = {
   showRay: true,
   showIntersections: true
 };
+let prevMousePressed = false; // Track previous frame's mouse state for click detection

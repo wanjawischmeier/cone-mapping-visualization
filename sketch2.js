@@ -20,6 +20,9 @@ function draw() {
   
   // Draw parameter sliders on the left
   drawUIPanel();
+  
+  // Update previous frame's mouse state for click detection
+  prevMousePressed = mouseIsPressed;
 }
 
 function windowResized() {
