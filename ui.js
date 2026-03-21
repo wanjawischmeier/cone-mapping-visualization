@@ -68,6 +68,12 @@ function drawUIPanel() {
   if (drawCheckbox("Show Intersections", uiState.showIntersections, uiPanelX + 10, currentUIY)) {
     uiState.showIntersections = !uiState.showIntersections;
   }
+  currentUIY += 30;
+  
+  // Toggle Hovered Cone visibility
+  if (drawCheckbox("Show Hovered Cone", uiState.showHoveredCone, uiPanelX + 10, currentUIY)) {
+    uiState.showHoveredCone = !uiState.showHoveredCone;
+  }
   currentUIY += 50;
   
   fill(0);
@@ -105,6 +111,18 @@ function drawUIPanel() {
     if (currentIteration > params.rayIterations) {
       currentIteration = params.rayIterations;
     }
+  });
+  
+  currentUIY = drawSlider("Slope Start:", params.heightmapSlopeStart, -1, 1, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
+    params.heightmapSlopeStart = val;
+  });
+  
+  currentUIY = drawSlider("Slope End:", params.heightmapSlopeEnd, -1, 1, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
+    params.heightmapSlopeEnd = val;
+  });
+  
+  currentUIY = drawSlider("Noise Power:", params.heightmapNoisePower, 0, 1, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
+    params.heightmapNoisePower = val;
   });
 }
 

@@ -39,7 +39,7 @@ function drawHeightmapVisualization() {
   }
 
   // Draw cone visualization and intersections if hovering
-  if (coneMap !== undefined && hoveredIndex >= 0) {
+  if (coneMap !== undefined && hoveredIndex >= 0 && uiState.showHoveredCone) {
     rayIntersections = rayConeConeIntersection(ray.x1, ray.y1, ray.x2, ray.y2,
       params.sideViewPadding + hoveredIndex * pointSpacing,
       params.sideViewPadding + viewHeight - heightmap[hoveredIndex] * (params.heightmapScale / 100) * viewHeight,
@@ -291,12 +291,16 @@ function drawRayStepping(pointSpacing, viewHeight, viewWidth) {
   let currentX = ray.x1;
   let currentY = ray.y1;
   const stepPoints = [{x: currentX, y: currentY}]; // Include starting point
+  let lastUsedIndex = -1;
   
   for (let step = 0; step < currentIteration; step++) {
-    // Find closest heightmap point
+    // Find closest heightmap point (but different from last used index)
     let closestIndex = 0;
     let closestDist = Infinity;
     for (let i = 0; i < heightmap.length; i++) {
+      // Skip the last used index to ensure progress
+      if (i === lastUsedIndex) continue;
+      
       const ptX = params.sideViewPadding + i * pointSpacing;
       const dist = Math.abs(currentX - ptX);
       if (dist < closestDist) {
@@ -304,6 +308,14 @@ function drawRayStepping(pointSpacing, viewHeight, viewWidth) {
         closestIndex = i;
       }
     }
+    
+    // If all points except lastUsedIndex were skipped, use lastUsedIndex's neighbor
+    if (closestIndex === lastUsedIndex) {
+      if (lastUsedIndex > 0) closestIndex = lastUsedIndex - 1;
+      else closestIndex = lastUsedIndex + 1;
+    }
+    
+    lastUsedIndex = closestIndex;
     
     // Get cone at this point
     const cone = coneMap[closestIndex];
