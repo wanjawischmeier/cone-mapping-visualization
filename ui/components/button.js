@@ -1,4 +1,4 @@
-function drawButton(label, x, y, w, h, disabled = false) {
+export function drawButton(label, x, y, w, h, disabled = false) {
     let isHovering = mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h;
 
     if (disabled) {

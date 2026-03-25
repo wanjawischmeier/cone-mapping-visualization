@@ -1,7 +1,7 @@
 // ============================================================================
 // PARAMETERS & CONFIGURATION
 // ============================================================================
-let params = {
+export let params = {
   get canvasWidth() {
     return window.innerWidth;
   },

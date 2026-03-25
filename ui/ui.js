@@ -1,19 +1,22 @@
-// ============================================================================
-// UI PANEL
-// ============================================================================
+import { params } from '../config.js';
+import { coneMap, state } from '../state.js';
+import { generateRandomHeightmap } from '../heightmap.js';
+import { generateConeMap } from '../coneMap.js';
+import { drawButton } from './components/button.js';
+
 // Helper: Detect if mouse clicked (transition from not pressed to pressed)
 function isMouseClicked(x, y, w, h) {
   const isHovering = mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h;
-  const wasPressed = prevMousePressed;
+  const wasPressed = state.prevMousePressed;
   const isPressed = mouseIsPressed;
   return isHovering && isPressed && !wasPressed;
 }
 
-function createUIPanel() {
+export function createUIPanel() {
   // This is handled in drawUIPanel for dynamic layout
 }
 
-function drawUIPanel() {
+export function drawUIPanel() {
   const uiPanelX = 0;
   const uiPanelY = 0;
   let currentUIY = 25;
@@ -41,15 +44,15 @@ function drawUIPanel() {
   currentUIY += 50;
   
   // Generate Cone Map Button
-  const coneMapExists = coneMap !== undefined;
+  const coneMapExists = coneMap.length > 0;
   if (isMouseClicked(uiPanelX + 10, currentUIY, params.uiPanelWidth - 20, 30) && !coneMapExists) {
     generateConeMap();
   }
   drawButton("Generate Cone Map", uiPanelX + 10, currentUIY, params.uiPanelWidth - 20, 30, coneMapExists);
   
   // Cone map status indicator
-  let coneMapStatus = coneMap !== undefined ? "✓ Ready" : "✗ Not Generated";
-  let statusColor = coneMap !== undefined ? [0, 150, 0] : [150, 0, 0];
+  let coneMapStatus = coneMap.length > 0 ? "✓ Ready" : "✗ Not Generated";
+  let statusColor = coneMap.length > 0 ? [0, 150, 0] : [150, 0, 0];
   fill(...statusColor);
   noStroke();
   textSize(10);
@@ -83,7 +86,7 @@ function drawUIPanel() {
   
   if (isMouseClicked(uiPanelX + 10, currentUIY, modeButtonWidth, 20)) {
     params.coneMode = 'isotropic';
-    coneMap = undefined;
+    state.coneMap.length = 0;
   }
   
   // Anisotropic button
@@ -99,28 +102,28 @@ function drawUIPanel() {
   
   if (isMouseClicked(uiPanelX + 20 + modeButtonWidth, currentUIY, modeButtonWidth, 20)) {
     params.coneMode = 'anisotropic';
-    coneMap = undefined;
+    state.coneMap.length = 0;
   }
   
   currentUIY += 40;
   
   // Toggle Ray visibility
-  if (drawCheckbox("Show Ray", uiState.showRay, uiPanelX + 10, currentUIY)) {
-    uiState.toggleRay();
+  if (drawCheckbox("Show Ray", state.uiState.showRay, uiPanelX + 10, currentUIY)) {
+    state.uiState.toggleRay();
   }
   currentUIY += 30;
   
   // Toggle Cone Stepping visibility (disabled if Show Ray is off or no cone map)
-  const coneSteppingDisabled = !uiState.showRay || coneMap === undefined;
-  if (drawCheckbox("Show Cone Stepping", uiState.showConeStepping, uiPanelX + 10, currentUIY, coneSteppingDisabled)) {
-    uiState.toggleConeStepping();
+  const coneSteppingDisabled = !state.uiState.showRay || coneMap.length === 0;
+  if (drawCheckbox("Show Cone Stepping", state.uiState.showConeStepping, uiPanelX + 10, currentUIY, coneSteppingDisabled)) {
+    state.uiState.toggleConeStepping();
   }
   currentUIY += 30;
   
   // Toggle Hovered Cone visibility (disabled if no cone map)
-  const hoveredConeDisabled = coneMap === undefined;
-  if (drawCheckbox("Show Hovered Cone", uiState.showHoveredCone, uiPanelX + 10, currentUIY, hoveredConeDisabled)) {
-    uiState.showHoveredCone = !uiState.showHoveredCone;
+  const hoveredConeDisabled = coneMap.length === 0;
+  if (drawCheckbox("Show Hovered Cone", state.uiState.showHoveredCone, uiPanelX + 10, currentUIY, hoveredConeDisabled)) {
+    state.uiState.toggleHoveredCone();
   }
   currentUIY += 50;
   
@@ -138,8 +141,8 @@ function drawUIPanel() {
   const sliderWidth = params.uiPanelWidth - 20;
   currentUIY = drawSlider("Resolution:", params.heightmapResolution, 10, 100, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
     params.heightmapResolution = Math.floor(val);
-    heightmap = undefined;
-    coneMap = undefined;
+    state.heightmap.length = 0;
+    state.coneMap.length = 0;
   });
   
   currentUIY = drawSlider("Height Scale:", params.heightmapScale, 10, 200, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
@@ -159,11 +162,11 @@ function drawUIPanel() {
     params.rayIterations = Math.floor(val);
     
     // If slider was at maximum, jump it to the new maximum
-    if (currentIteration === previousMax - 1) {
-      currentIteration = params.rayIterations - 1;
-    } else if (currentIteration > params.rayIterations - 1) {
+    if (state.currentIteration === previousMax - 1) {
+      state.currentIteration = params.rayIterations - 1;
+    } else if (state.currentIteration > params.rayIterations - 1) {
       // If it exceeds the new max, clamp it
-      currentIteration = params.rayIterations - 1;
+      state.currentIteration = params.rayIterations - 1;
     }
   });
   

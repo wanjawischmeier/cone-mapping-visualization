@@ -1,7 +1,10 @@
+import { params } from './config.js';
+import { state } from './state.js';
+
 // ============================================================================
 // CONE CLASS
 // ============================================================================
-class Cone {
+export class Cone {
   // Store left and right angles separately to support both isotropic and anisotropic cones
   constructor(height, leftAngle, rightAngle, radius, index) {
     this.height = height;
@@ -38,56 +41,56 @@ class Cone {
 // ============================================================================
 // CONE MAP GENERATION
 // ============================================================================
-function generateConeMap() {
-  if (heightmap === undefined) {
-    console.warn("Cannot generate cone map: heightmap is undefined");
+export function generateConeMap() {
+  if (state.heightmap.length === 0) {
+    console.warn("Cannot generate cone map: heightmap is empty");
     return;
   }
 
-  coneMap = [];
+  state.coneMap.length = 0;
 
   if (params.coneMode === 'isotropic') {
     // Isotropic: same angle on both sides
-    for (let i = 0; i < heightmap.length; i++) {
+    for (let i = 0; i < state.heightmap.length; i++) {
       let maxSlope = 0; // steepest slope found
 
       // Check all other points
-      for (let j = 0; j < heightmap.length; j++) {
+      for (let j = 0; j < state.heightmap.length; j++) {
         if (i === j) continue;
 
         const dx = Math.abs(j - i); // horizontal distance in samples
-        const dh = heightmap[j] - heightmap[i]; // absolute height difference
+        const dh = state.heightmap[j] - state.heightmap[i]; // absolute height difference
         const slope = dh / dx; // slope to this point
 
         // Track the steepest slope (most constraining)
         maxSlope = Math.max(maxSlope, slope);
       }
 
-      coneMap.push(Cone.isotropic(heightmap[i], maxSlope, i));
+      state.coneMap.push(Cone.isotropic(state.heightmap[i], maxSlope, i));
     }
   } else if (params.coneMode === 'anisotropic') {
     // Anisotropic: potentially different angles on left and right
-    for (let i = 0; i < heightmap.length; i++) {
+    for (let i = 0; i < state.heightmap.length; i++) {
       let leftSlope = 0;  // steepest upslope to the left
       let rightSlope = 0; // steepest upslope to the right
 
       // Check points to the left
       for (let j = 0; j < i; j++) {
         const dx = i - j; // distance to the left
-        const dh = heightmap[j] - heightmap[i];
+        const dh = state.heightmap[j] - state.heightmap[i];
         const slope = dh / dx;
         leftSlope = Math.max(leftSlope, slope);
       }
 
       // Check points to the right
-      for (let j = i + 1; j < heightmap.length; j++) {
+      for (let j = i + 1; j < state.heightmap.length; j++) {
         const dx = j - i; // distance to the right
-        const dh = heightmap[j] - heightmap[i];
+        const dh = state.heightmap[j] - state.heightmap[i];
         const slope = dh / dx;
         rightSlope = Math.max(rightSlope, slope);
       }
 
-      coneMap.push(Cone.anisotropic(heightmap[i], leftSlope, rightSlope, i));
+      state.coneMap.push(Cone.anisotropic(state.heightmap[i], leftSlope, rightSlope, i));
     }
   }
   

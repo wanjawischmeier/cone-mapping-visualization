@@ -1,7 +1,10 @@
-function drawHoveredCone(pointSpacing, viewHeight, viewWidth) {
-    if (hoveredIndex < 0 || hoveredIndex >= coneMap.length) return;
+import { params } from '../../config.js';
+import { coneMap, state } from '../../state.js';
 
-    const cone = coneMap[hoveredIndex];
+export function drawHoveredCone(pointSpacing, viewHeight, viewWidth) {
+    if (state.hoveredIndex < 0 || state.hoveredIndex >= coneMap.length) return;
+
+    const cone = coneMap[state.hoveredIndex];
     const { x, y } = cone.getScreenPosition(pointSpacing, viewHeight, params.sideViewPadding);
 
     // Account for the height scale when computing pixel slopes
@@ -40,17 +43,17 @@ function drawHoveredCone(pointSpacing, viewHeight, viewWidth) {
     circle(x, y, params.pointSize + 4);
 }
 
-function drawRay(boxMinX, boxMinY, boxWidth, boxHeight) {
+export function drawRay(boxMinX, boxMinY, boxWidth, boxHeight) {
     // Visualization box bounds
     const boxMaxX = boxMinX + boxWidth;
     const boxMaxY = boxMinY + boxHeight;
 
     // Calculate ray direction
-    const rayDx = ray.x2 - ray.x1;
-    const rayDy = ray.y2 - ray.y1;
+    const rayDx = state.ray.x2 - state.ray.x1;
+    const rayDy = state.ray.y2 - state.ray.y1;
 
     // Clip ray to box
-    const clipped = clipLineToBox(ray.x1, ray.y1, rayDx, rayDy, boxMinX, boxMinY, boxMaxX, boxMaxY);
+    const clipped = clipLineToBox(state.ray.x1, state.ray.y1, rayDx, rayDy, boxMinX, boxMinY, boxMaxX, boxMaxY);
     if (clipped) {
         stroke(100, 150, 255);
         strokeWeight(2);
@@ -60,17 +63,17 @@ function drawRay(boxMinX, boxMinY, boxWidth, boxHeight) {
     // Draw grabbable endpoints (larger)
     fill(100, 150, 255);
     noStroke();
-    circle(ray.x1, ray.y1, 16);
-    circle(ray.x2, ray.y2, 16);
+    circle(state.ray.x1, state.ray.y1, 16);
+    circle(state.ray.x2, state.ray.y2, 16);
 }
 
-function drawRayIntersections() {
-    if (rayIntersections.length === 0) return;
+export function drawRayIntersections() {
+    if (state.rayIntersections.length === 0) return;
 
     fill(0, 255, 0);
     noStroke();
 
-    for (let intersection of rayIntersections) {
+    for (let intersection of state.rayIntersections) {
         circle(intersection.x, intersection.y, 10);
     }
 }
@@ -78,7 +81,7 @@ function drawRayIntersections() {
 // Helper: Clip a line defined by point and direction to a box
 // Only extends in the positive direction (t >= 0)
 // Returns {startX, startY, endX, endY} or null if line misses box
-function clipLineToBox(x0, y0, dx, dy, boxMinX, boxMinY, boxMaxX, boxMaxY) {
+export function clipLineToBox(x0, y0, dx, dy, boxMinX, boxMinY, boxMaxX, boxMaxY) {
     const boxMaxX_val = boxMaxX;
     const boxMaxY_val = boxMaxY;
 

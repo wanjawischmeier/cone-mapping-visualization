@@ -1,8 +1,11 @@
+import { params } from './config.js';
+import { state } from './state.js';
+
 // ============================================================================
 // HEIGHTMAP GENERATION
 // ============================================================================
-function generateRandomHeightmap() {
-  heightmap = [];
+export function generateRandomHeightmap() {
+  state.heightmap.length = 0; // Clear the array
   for (let i = 0; i < params.heightmapResolution; i++) {
     // Generate noise scaled by noise power
     const noise = random(0, 1) * params.heightmapNoisePower;
@@ -11,8 +14,8 @@ function generateRandomHeightmap() {
     const slopeY = params.heightmapSlopeStart + (params.heightmapSlopeEnd - params.heightmapSlopeStart) * t;
     // Add slope to noise and clamp
     const height = Math.min(1, Math.max(0, noise + slopeY));
-    heightmap.push(height);
+    state.heightmap.push(height);
   }
-  coneMap = undefined; // Reset cone map when generating new heightmap
-  hoveredIndex = -1;
+  state.coneMap.length = 0; // Reset cone map when generating new heightmap
+  state.hoveredIndex = -1;
 }

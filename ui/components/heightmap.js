@@ -1,4 +1,7 @@
-function drawHeightmapProfile(pointSpacing, viewHeight) {
+import { params } from '../../config.js';
+import { heightmap } from '../../state.js';
+
+export function drawHeightmapProfile(pointSpacing, viewHeight) {
     stroke(0);
     strokeWeight(params.lineWeight);
     noFill();
@@ -21,7 +24,7 @@ function drawHeightmapProfile(pointSpacing, viewHeight) {
     }
 }
 
-function drawHeightmapPoints(pointSpacing, viewHeight) {
+export function drawHeightmapPoints(pointSpacing, viewHeight) {
     const baseY = params.sideViewPadding + viewHeight + 40;
 
     for (let i = 0; i < heightmap.length; i++) {

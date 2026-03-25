@@ -1,4 +1,7 @@
-function drawIterationSlider() {
+import { params } from '../../config.js';
+import { state } from '../../state.js';
+
+export function drawIterationSlider() {
     const sliderY = 10;
     const sliderWidth = 150;
     const labelX = params.sideViewPadding + 10;
@@ -25,21 +28,21 @@ function drawIterationSlider() {
         mouseY >= sliderY && mouseY <= sliderY + 20;
 
     // Start dragging if clicked on slider
-    if (isHoveringSlider && mouseIsPressed && !prevMousePressed) {
-        draggingIterationSlider = true;
+    if (isHoveringSlider && mouseIsPressed && !state.prevMousePressed) {
+        state.draggingIterationSlider = true;
     }
 
     // Dragging logic
-    if (draggingIterationSlider && mouseIsPressed) {
+    if (state.draggingIterationSlider && mouseIsPressed) {
         const ratio = Math.max(0, Math.min(1, (adjustedMouseX - sliderX) / sliderWidth));
-        currentIteration = Math.floor(ratio * (params.rayIterations - 1));
+        state.currentIteration = Math.floor(ratio * (params.rayIterations - 1));
     } else if (!mouseIsPressed) {
-        draggingIterationSlider = false;
+        state.draggingIterationSlider = false;
     }
 
     // Draw slider thumb
-    const thumbX = map(currentIteration, 0, params.rayIterations - 1, sliderX, sliderX + sliderWidth);
-    fill(draggingIterationSlider ? 60 : 100);
+    const thumbX = map(state.currentIteration, 0, params.rayIterations - 1, sliderX, sliderX + sliderWidth);
+    fill(state.draggingIterationSlider ? 60 : 100);
     noStroke();
     rect(thumbX - 5, sliderY, 10, 20);
 
@@ -48,5 +51,5 @@ function drawIterationSlider() {
     noStroke();
     textSize(10);
     textAlign(LEFT, CENTER);
-    text(currentIteration + " / " + (params.rayIterations - 1), sliderX + sliderWidth + 10, sliderY + 10);
+    text(state.currentIteration + " / " + (params.rayIterations - 1), sliderX + sliderWidth + 10, sliderY + 10);
 }

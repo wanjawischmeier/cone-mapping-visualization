@@ -1,5 +1,10 @@
-function drawRayStepping(pointSpacing, viewHeight, viewWidth) {
-    if (heightmap === undefined || coneMap === undefined) return;
+import { params } from '../../config.js';
+import { heightmap, coneMap, state } from '../../state.js';
+import { clipLineToBox } from './shapes.js';
+import { Ray } from '../../ray.js';
+
+export function drawRayStepping(pointSpacing, viewHeight, viewWidth) {
+    if (!heightmap.length || !coneMap.length) return;
 
     const viewHeight_canvas = params.canvasHeight - 2 * params.sideViewPadding;
     const scaleFactor = params.heightmapScale / 100;
@@ -9,12 +14,12 @@ function drawRayStepping(pointSpacing, viewHeight, viewWidth) {
     const boxMaxY = params.sideViewPadding + viewHeight_canvas;
 
     // Perform actual cone stepping
-    let currentX = ray.x1;
-    let currentY = ray.y1;
+    let currentX = state.ray.x1;
+    let currentY = state.ray.y1;
     const stepPoints = [{ x: currentX, y: currentY }]; // Include starting point
     let lastUsedIndex = -1;
 
-    for (let step = 0; step < currentIteration; step++) {
+    for (let step = 0; step < state.currentIteration; step++) {
         // Find closest heightmap point (but different from last used index)
         let closestIndex = 0;
         let closestDist = Infinity;
@@ -45,8 +50,8 @@ function drawRayStepping(pointSpacing, viewHeight, viewWidth) {
 
         // Calculate ray-cone intersection
         // Using a very distant point for ray2 to ensure it acts as an infinite ray
-        const rayDx = ray.x2 - ray.x1;
-        const rayDy = ray.y2 - ray.y1;
+        const rayDx = state.ray.x2 - state.ray.x1;
+        const rayDy = state.ray.y2 - state.ray.y1;
         const rayLen = Math.sqrt(rayDx * rayDx + rayDy * rayDy);
         const rayUx = rayLen > 0 ? rayDx / rayLen : 0;
         const rayUy = rayLen > 0 ? rayDy / rayLen : 0;

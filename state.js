@@ -1,7 +1,9 @@
+import { Ray } from './ray.js';
+
 // ============================================================================
 // UI STATE CLASS
 // ============================================================================
-class UIState {
+export class UIState {
   constructor() {
     this.showRay = true;
     this.showConeStepping = true;
@@ -32,15 +34,30 @@ class UIState {
 }
 
 // ============================================================================
-// STATE
+// STATE OBJECT - Use single state object for proper module binding
 // ============================================================================
-let heightmap = undefined;
-let coneMap = undefined;
-let hoveredIndex = -1;
-let ray = new Ray(150, 100, 300, 400);
-let draggingRayPoint = -1; // -1 = not dragging, 0 = point1, 1 = point2
-let rayIntersections = []; // Array of intersection objects
-let uiState = new UIState();
-let prevMousePressed = false; // Track previous frame's mouse state for click detection
-let currentIteration = 9; // Start at maximum (params.rayIterations - 1, with default rayIterations = 10)
-let draggingIterationSlider = false; // Track if currently dragging iteration slider
+export const state = {
+  heightmap: [],
+  coneMap: [],
+  hoveredIndex: -1,
+  ray: new Ray(150, 100, 300, 400),
+  draggingRayPoint: -1, // -1 = not dragging, 0 = point1, 1 = point2
+  rayIntersections: [], // Array of intersection objects
+  uiState: new UIState(),
+  prevMousePressed: false, // Track previous frame's mouse state for click detection
+  currentIteration: 9, // Start at maximum (params.rayIterations - 1, with default rayIterations = 10)
+  draggingIterationSlider: false, // Track if currently dragging iteration slider
+};
+
+// Export convenience references that point to state object properties
+// This allows `import { heightmap } from state` to still work
+export const heightmap = state.heightmap;
+export const coneMap = state.coneMap;
+export const hoveredIndex = state.hoveredIndex;
+export const ray = state.ray;
+export const draggingRayPoint = state.draggingRayPoint;
+export const rayIntersections = state.rayIntersections;
+export const uiState = state.uiState;
+export const prevMousePressed = state.prevMousePressed;
+export const currentIteration = state.currentIteration;
+export const draggingIterationSlider = state.draggingIterationSlider;
