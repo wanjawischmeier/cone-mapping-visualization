@@ -98,14 +98,22 @@ export class Ray {
     
     const t = (line.slope * (this.x1 - line.x) - (this.y1 - line.y)) / denom;
     
-    // Only accept intersections along the ray direction (t > 0)
-    if (t < -0.0001) return null;
+    // Only accept intersections along the ray direction (t >= 0)
+    if (t < 0.0001) return null;
     
     const ix = this.x1 + t * rayDx;
     const iy = this.y1 + t * rayDy;
     
-    // Only return intersection if it's on the upward expanding part of the cone
-    if (iy > line.y + 0.1) return null;
+    // For non-horizontal lines, check if intersection is below the cone origin (expanding part of cone)
+    // For horizontal lines (slope ~= 0), check if intersection is to the right of the cone origin
+    if (Math.abs(line.slope) > 0.01) {
+      // Non-horizontal: check y coordinate
+      if (iy > line.y - 0.1) return null;
+    } else {
+      // Horizontal: check x coordinate (intersection should be ahead in x direction)
+      if (line.slope >= 0 && ix < line.x + 0.1) return null;
+      if (line.slope < 0 && ix > line.x - 0.1) return null;
+    }
     
     return { x: ix, y: iy };
   }
