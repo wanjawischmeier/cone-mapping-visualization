@@ -117,21 +117,15 @@ function drawHoveredCone(pointSpacing, viewHeight, viewWidth) {
   if (hoveredIndex < 0 || hoveredIndex >= coneMap.length) return;
   
   const cone = coneMap[hoveredIndex];
-  const x = params.sideViewPadding + hoveredIndex * pointSpacing;
-  
-  // Cone origin at the actual profile point
-  const scaledHeight = heightmap[hoveredIndex] * (params.heightmapScale / 100);
-  const coneOriginY = params.sideViewPadding + viewHeight - scaledHeight * viewHeight;
-  
-  // Calculate cone visualization in pixels
-  const coneAngle = cone.angle;
+  const { x, y } = cone.getScreenPosition(pointSpacing, viewHeight, params.sideViewPadding);
   
   // Account for the height scale when computing pixel slopes
   const scaleFactor = params.heightmapScale / 100;
   const effectiveViewHeight = viewHeight * scaleFactor;
   
-  // Cone expands at rate: tan(angle) in data space
-  const slopePixels = Math.tan(coneAngle) * (effectiveViewHeight / pointSpacing);
+  // Calculate pixel slopes for left and right edges (may be different for anisotropic cones)
+  const leftSlopePixels = Math.tan(cone.leftAngle) * (effectiveViewHeight / pointSpacing);
+  const rightSlopePixels = Math.tan(cone.rightAngle) * (effectiveViewHeight / pointSpacing);
   
   // Visualization box bounds
   const boxMinX = params.sideViewPadding;
@@ -139,16 +133,16 @@ function drawHoveredCone(pointSpacing, viewHeight, viewWidth) {
   const boxMaxX = params.sideViewPadding + viewWidth;
   const boxMaxY = params.sideViewPadding + viewHeight;
   
-  // Left cone edge: passes through apex with direction (-1, -slopePixels)
-  const leftEdge = clipLineToBox(x, coneOriginY, -1, -slopePixels, boxMinX, boxMinY, boxMaxX, boxMaxY);
+  // Left cone edge: passes through apex with direction (-1, -leftSlopePixels)
+  const leftEdge = clipLineToBox(x, y, -1, -leftSlopePixels, boxMinX, boxMinY, boxMaxX, boxMaxY);
   if (leftEdge) {
     stroke(255, 100, 100);
     strokeWeight(2);
     line(leftEdge.startX, leftEdge.startY, leftEdge.endX, leftEdge.endY);
   }
   
-  // Right cone edge: passes through apex with direction (1, -slopePixels)
-  const rightEdge = clipLineToBox(x, coneOriginY, 1, -slopePixels, boxMinX, boxMinY, boxMaxX, boxMaxY);
+  // Right cone edge: passes through apex with direction (1, -rightSlopePixels)
+  const rightEdge = clipLineToBox(x, y, 1, -rightSlopePixels, boxMinX, boxMinY, boxMaxX, boxMaxY);
   if (rightEdge) {
     stroke(255, 100, 100);
     strokeWeight(2);
@@ -158,7 +152,7 @@ function drawHoveredCone(pointSpacing, viewHeight, viewWidth) {
   // Highlight the apex point
   fill(255, 100, 100);
   noStroke();
-  circle(x, coneOriginY, params.pointSize + 4);
+  circle(x, y, params.pointSize + 4);
 }
 
 function drawRay(boxMinX, boxMinY, boxWidth, boxHeight) {

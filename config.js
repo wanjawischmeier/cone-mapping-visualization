@@ -19,4 +19,5 @@ let params = {
   heightmapSlopeStart: 0.7,
   heightmapSlopeEnd: 0.0,
   heightmapNoisePower: 0.3,
+  coneMode: 'isotropic', // 'isotropic' or 'anisotropic'
 };

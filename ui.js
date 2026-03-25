@@ -58,6 +58,51 @@ function drawUIPanel() {
   
   currentUIY += 50;
   
+  // Cone mode selector
+  fill(0);
+  noStroke();
+  textSize(10);
+  textAlign(LEFT);
+  text("Cone Mode:", uiPanelX + 10, currentUIY);
+  currentUIY += 15;
+  
+  const modeButtonWidth = (params.uiPanelWidth - 30) / 2;
+  const isIsotropic = params.coneMode === 'isotropic';
+  
+  // Isotropic button
+  fill(isIsotropic ? 100 : 150);
+  stroke(50);
+  strokeWeight(1);
+  rect(uiPanelX + 10, currentUIY, modeButtonWidth, 20);
+  fill(255);
+  noStroke();
+  textSize(9);
+  textAlign(CENTER, CENTER);
+  text("Isotropic", uiPanelX + 10 + modeButtonWidth / 2, currentUIY + 10);
+  
+  if (isMouseClicked(uiPanelX + 10, currentUIY, modeButtonWidth, 20)) {
+    params.coneMode = 'isotropic';
+    coneMap = undefined;
+  }
+  
+  // Anisotropic button
+  fill(!isIsotropic ? 100 : 150);
+  stroke(50);
+  strokeWeight(1);
+  rect(uiPanelX + 20 + modeButtonWidth, currentUIY, modeButtonWidth, 20);
+  fill(255);
+  noStroke();
+  textSize(9);
+  textAlign(CENTER, CENTER);
+  text("Anisotropic", uiPanelX + 20 + modeButtonWidth + modeButtonWidth / 2, currentUIY + 10);
+  
+  if (isMouseClicked(uiPanelX + 20 + modeButtonWidth, currentUIY, modeButtonWidth, 20)) {
+    params.coneMode = 'anisotropic';
+    coneMap = undefined;
+  }
+  
+  currentUIY += 40;
+  
   // Toggle Ray visibility
   if (drawCheckbox("Show Ray", uiState.showRay, uiPanelX + 10, currentUIY)) {
     uiState.toggleRay();

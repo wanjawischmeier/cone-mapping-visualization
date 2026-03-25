@@ -72,11 +72,14 @@ class Ray {
     // Cone parameters
     const scaleFactor = params.heightmapScale / 100;
     const effectiveViewHeight = viewHeight * scaleFactor;
-    const slopePixels = Math.tan(cone.angle) * (effectiveViewHeight / pointSpacing);
+    
+    // Use left and right angles from cone (may be different for anisotropic cones)
+    const leftSlopePixels = Math.tan(cone.leftAngle) * (effectiveViewHeight / pointSpacing);
+    const rightSlopePixels = Math.tan(cone.rightAngle) * (effectiveViewHeight / pointSpacing);
     
     // Create left and right edge lines
-    const leftEdge = new Line(coneX, coneY, slopePixels);
-    const rightEdge = new Line(coneX, coneY, -slopePixels);
+    const leftEdge = new Line(coneX, coneY, leftSlopePixels);
+    const rightEdge = new Line(coneX, coneY, -rightSlopePixels);
     
     // Find intersections with both cone edges
     const leftIntersection = this._intersectWithLine(leftEdge);
