@@ -136,11 +136,5 @@ export function drawLastSteppingState(viewWidth, viewHeight) {
       strokeWeight(2);
       line(clipped.startX, clipped.startY, clipped.endX, clipped.endY);
     }
-
-    // Draw grabbable endpoints (larger) with low opacity
-    fill(100, 150, 255, opacity);
-    noStroke();
-    circle(state.lastRay.x1, state.lastRay.y1, 16);
-    circle(state.lastRay.x2, state.lastRay.y2, 16);
   }
 }
