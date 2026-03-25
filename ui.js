@@ -41,10 +41,11 @@ function drawUIPanel() {
   currentUIY += 50;
   
   // Generate Cone Map Button
-  if (isMouseClicked(uiPanelX + 10, currentUIY, params.uiPanelWidth - 20, 30)) {
+  const coneMapExists = coneMap !== undefined;
+  if (isMouseClicked(uiPanelX + 10, currentUIY, params.uiPanelWidth - 20, 30) && !coneMapExists) {
     generateConeMap();
   }
-  drawButton("Generate Cone Map", uiPanelX + 10, currentUIY, params.uiPanelWidth - 20, 30);
+  drawButton("Generate Cone Map", uiPanelX + 10, currentUIY, params.uiPanelWidth - 20, 30, coneMapExists);
   
   // Cone map status indicator
   let coneMapStatus = coneMap !== undefined ? "✓ Ready" : "✗ Not Generated";
@@ -109,14 +110,16 @@ function drawUIPanel() {
   }
   currentUIY += 30;
   
-  // Toggle Ray-Cone Intersections visibility
-  if (drawCheckbox("Show Intersections", uiState.showIntersections, uiPanelX + 10, currentUIY)) {
-    uiState.toggleIntersections();
+  // Toggle Cone Stepping visibility (disabled if Show Ray is off or no cone map)
+  const coneSteppingDisabled = !uiState.showRay || coneMap === undefined;
+  if (drawCheckbox("Show Cone Stepping", uiState.showConeStepping, uiPanelX + 10, currentUIY, coneSteppingDisabled)) {
+    uiState.toggleConeStepping();
   }
   currentUIY += 30;
   
-  // Toggle Hovered Cone visibility
-  if (drawCheckbox("Show Hovered Cone", uiState.showHoveredCone, uiPanelX + 10, currentUIY)) {
+  // Toggle Hovered Cone visibility (disabled if no cone map)
+  const hoveredConeDisabled = coneMap === undefined;
+  if (drawCheckbox("Show Hovered Cone", uiState.showHoveredCone, uiPanelX + 10, currentUIY, hoveredConeDisabled)) {
     uiState.showHoveredCone = !uiState.showHoveredCone;
   }
   currentUIY += 50;
@@ -152,9 +155,15 @@ function drawUIPanel() {
   });
   
   currentUIY = drawSlider("Max Iterations (n):", params.rayIterations, 1, 50, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
+    const previousMax = params.rayIterations;
     params.rayIterations = Math.floor(val);
-    if (currentIteration > params.rayIterations) {
-      currentIteration = params.rayIterations;
+    
+    // If slider was at maximum, jump it to the new maximum
+    if (currentIteration === previousMax - 1) {
+      currentIteration = params.rayIterations - 1;
+    } else if (currentIteration > params.rayIterations - 1) {
+      // If it exceeds the new max, clamp it
+      currentIteration = params.rayIterations - 1;
     }
   });
   
@@ -171,36 +180,46 @@ function drawUIPanel() {
   });
 }
 
-function drawButton(label, x, y, w, h) {
+function drawButton(label, x, y, w, h, disabled = false) {
   let isHovering = mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h;
   
-  fill(isHovering ? 100 : 150);
-  stroke(50);
+  if (disabled) {
+    fill(180);
+    stroke(120);
+  } else {
+    fill(isHovering ? 100 : 150);
+    stroke(50);
+  }
   strokeWeight(2);
   rect(x, y, w, h);
   
-  fill(255);
+  fill(disabled ? 150 : 255);
   noStroke();
   textSize(12);
   textAlign(CENTER, CENTER);
   textStyle(BOLD);
   text(label, x + w / 2, y + h / 2);
   
-  return isHovering && mouseIsPressed;
+  return !disabled && isHovering && mouseIsPressed;
 }
 
-function drawCheckbox(label, isChecked, x, y) {
+function drawCheckbox(label, isChecked, x, y, disabled = false) {
   const boxSize = 16;
   const labelX = x + boxSize + 10;
   
   // Draw checkbox
-  fill(isChecked ? 100 : 255);
-  stroke(50);
+  if (disabled) {
+    fill(200);
+    stroke(150);
+  } else {
+    fill(isChecked ? 100 : 255);
+    stroke(50);
+  }
   strokeWeight(1);
   rect(x, y, boxSize, boxSize);
   
   // Draw checkmark if checked
-  if (isChecked) {
+  if (isChecked && !disabled) {
     stroke(255);
     strokeWeight(2);
     noFill();
@@ -209,15 +228,15 @@ function drawCheckbox(label, isChecked, x, y) {
   }
   
   // Draw label
-  fill(0);
+  fill(disabled ? 150 : 0);
   noStroke();
   textSize(11);
   textAlign(LEFT, CENTER);
   textStyle(NORMAL);
   text(label, labelX, y + boxSize / 2);
   
-  // Check for click (only on click, not continuous press)
-  return isMouseClicked(x, y, boxSize, boxSize);
+  // Check for click (only if not disabled)
+  return !disabled && isMouseClicked(x, y, boxSize, boxSize);
 }
 
 function drawSlider(label, value, min, max, x, y, w, callback) {

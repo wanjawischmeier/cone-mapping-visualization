@@ -4,7 +4,7 @@
 class UIState {
   constructor() {
     this.showRay = true;
-    this.showIntersections = true;
+    this.showConeStepping = true;
     this.showHoveredCone = false;
   }
 
@@ -13,9 +13,9 @@ class UIState {
     this.showRay = !this.showRay;
   }
 
-  // Toggle intersections visibility
-  toggleIntersections() {
-    this.showIntersections = !this.showIntersections;
+  // Toggle cone stepping visibility
+  toggleConeStepping() {
+    this.showConeStepping = !this.showConeStepping;
   }
 
   // Toggle hovered cone visibility
@@ -26,7 +26,7 @@ class UIState {
   // Reset to defaults
   reset() {
     this.showRay = true;
-    this.showIntersections = true;
+    this.showConeStepping = true;
     this.showHoveredCone = false;
   }
 }
@@ -42,4 +42,5 @@ let draggingRayPoint = -1; // -1 = not dragging, 0 = point1, 1 = point2
 let rayIntersections = []; // Array of intersection objects
 let uiState = new UIState();
 let prevMousePressed = false; // Track previous frame's mouse state for click detection
-let currentIteration = 0; // To be synced with params.rayIterations (0 = origin)
+let currentIteration = 9; // Start at maximum (params.rayIterations - 1, with default rayIterations = 10)
+let draggingIterationSlider = false; // Track if currently dragging iteration slider

@@ -87,20 +87,7 @@ function mouseWheel(event) {
 }
 
 function mousePressed() {
-  // Left-click in heightmap area to reset to n-1
-  const viewHeight = params.canvasHeight - 2 * params.sideViewPadding;
-  const viewWidth = params.canvasWidth - params.uiPanelWidth - 2 * params.sideViewPadding;
-  const adjustedMouseX = mouseX - params.uiPanelWidth;
-  const minX = params.sideViewPadding;
-  const maxX = params.sideViewPadding + viewWidth;
-  const minY = params.sideViewPadding;
-  const maxY = params.sideViewPadding + viewHeight;
-  
-  // Check if mouse is over heightmap visualization area and not dragging ray
-  if (adjustedMouseX >= minX && adjustedMouseX <= maxX && mouseY >= minY && mouseY <= maxY) {
-    if (draggingRayPoint === -1) {
-      currentIteration = params.rayIterations - 1;
-      return false;
-    }
-  }
+  // Only reset iteration if specifically not dragging the slider or ray
+  // Do not automatically reset on general clicks
+  return false;
 }
