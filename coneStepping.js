@@ -2,13 +2,10 @@ import { params } from './config.js';
 import { state } from './state.js';
 import { Ray } from './ray.js';
 
-// ============================================================================
-// CONE STEPPING ALGORITHM
-// ============================================================================
 // Performs cone stepping along the ray and returns step data
 export function performConeStepping() {
-  if (!state.heightmap.length || !state.coneMap.length) {
-    state.steppingData = { stepPoints: [], currentConeIndex: -1, pointSpacing: 0 };
+  // Only run if stepping is enabled
+  if (!state.steppingRunning || !state.heightmap.length || !state.coneMap.length) {
     return;
   }
 

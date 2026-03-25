@@ -1,9 +1,6 @@
 import { params } from './config.js';
 import { state } from './state.js';
 
-// ============================================================================
-// HEIGHTMAP GENERATION
-// ============================================================================
 export function generateRandomHeightmap() {
   state.heightmap.length = 0; // Clear the array
   for (let i = 0; i < params.heightmapResolution; i++) {

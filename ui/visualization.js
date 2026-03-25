@@ -2,12 +2,9 @@ import { params } from '../config.js';
 import { state } from '../state.js';
 import { drawHeightmapProfile, drawHeightmapPoints } from './components/heightmap.js';
 import { drawIterationSlider } from './components/iterationSlider.js';
-import { drawConeStepping } from './components/coneStepping.js';
+import { drawConeStepping, drawLastSteppingState } from './components/coneStepping.js';
 import { drawHoveredCone, drawRayIntersections, drawRay, clipLineToBox } from './components/shapes.js';
 
-// ============================================================================
-// VISUALIZATION
-// ============================================================================
 export function drawHeightmapVisualization() {
   if (state.heightmap.length === 0) {
     fill(150);
@@ -43,7 +40,12 @@ export function drawHeightmapVisualization() {
     drawRay(params.sideViewPadding, params.sideViewPadding, viewWidth, viewHeight);
     // Draw ray stepping visualization if enabled
     if (state.uiState.showConeStepping) {
-      drawConeStepping(viewWidth, viewHeight);
+      // Show current stepping when running, or last stepping when paused
+      if (state.steppingRunning) {
+        drawConeStepping(viewWidth, viewHeight);
+      } else {
+        drawLastSteppingState(viewWidth, viewHeight);
+      }
     }
   }
 

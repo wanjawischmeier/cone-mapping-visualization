@@ -1,9 +1,6 @@
 import { params } from './config.js';
 import { state } from './state.js';
 
-// ============================================================================
-// CONE CLASS
-// ============================================================================
 export class Cone {
   // Store left and right angles separately to support both isotropic and anisotropic cones
   constructor(height, leftAngle, rightAngle, radius, index) {
@@ -38,9 +35,6 @@ export class Cone {
   }
 }
 
-// ============================================================================
-// CONE MAP GENERATION
-// ============================================================================
 export function generateConeMap() {
   if (state.heightmap.length === 0) {
     console.warn("Cannot generate cone map: heightmap is empty");
@@ -95,4 +89,7 @@ export function generateConeMap() {
   }
   
   console.log(`Generated ${params.coneMode} cone map`);
+  
+  // Enable cone stepping when cone map is generated
+  state.steppingRunning = true;
 }

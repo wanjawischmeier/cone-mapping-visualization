@@ -1,8 +1,5 @@
 import { Ray } from './ray.js';
 
-// ============================================================================
-// UI STATE CLASS
-// ============================================================================
 export class UIState {
   constructor() {
     this.showRay = true;
@@ -33,9 +30,6 @@ export class UIState {
   }
 }
 
-// ============================================================================
-// STATE OBJECT - Use single state object for proper module binding
-// ============================================================================
 export const state = {
   heightmap: [],
   coneMap: [],
@@ -48,6 +42,9 @@ export const state = {
   currentIteration: 9, // Start at maximum (params.rayIterations - 1, with default rayIterations = 10)
   draggingIterationSlider: false, // Track if currently dragging iteration slider
   steppingData: { stepPoints: [], currentConeIndex: -1, pointSpacing: 0 }, // Data from cone stepping algorithm
+  steppingRunning: false, // Whether cone stepping is actively running
+  lastSteppingData: { stepPoints: [], currentConeIndex: -1, pointSpacing: 0 }, // Last stepping state when paused
+  lastRay: { x1: 150, y1: 100, x2: 300, y2: 400 }, // Last ray position when paused
 };
 
 // Export convenience references that point to state object properties

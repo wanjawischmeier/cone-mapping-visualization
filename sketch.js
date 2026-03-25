@@ -5,9 +5,6 @@ import { createUIPanel, drawUIPanel } from './ui/ui.js';
 import { state } from './state.js';
 import { performConeStepping } from './coneStepping.js';
 
-// ============================================================================
-// SETUP & DRAW
-// ============================================================================
 function setup() {
   createCanvas(params.canvasWidth, params.canvasHeight);
   createUIPanel();

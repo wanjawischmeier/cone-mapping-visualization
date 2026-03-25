@@ -61,6 +61,32 @@ export function drawUIPanel() {
   textAlign(LEFT);
   
   currentUIY += 50;
+
+  // Cone stepping run/pause button (disabled until cone map is generated)
+  const steppingButtonDisabled = state.coneMap.length === 0;
+  const steppingLabel = state.steppingRunning ? "Pause Stepping" : "Run Stepping";
+  if (drawButton(steppingLabel, uiPanelX + 10, currentUIY, params.uiPanelWidth - 20, 30, steppingButtonDisabled)) {
+    // Save current stepping data when pausing
+    if (state.steppingRunning) {
+      // Save the current ray position and stepping data
+      state.lastRay = {
+        x1: state.ray.x1,
+        y1: state.ray.y1,
+        x2: state.ray.x2,
+        y2: state.ray.y2
+      };
+      state.lastSteppingData = {
+        stepPoints: [...state.steppingData.stepPoints],
+        currentConeIndex: state.steppingData.currentConeIndex,
+        pointSpacing: state.steppingData.pointSpacing
+      };
+      // Clear current stepping data so only last state is shown
+      state.steppingData = { stepPoints: [], currentConeIndex: -1, pointSpacing: 0 };
+    }
+    state.steppingRunning = !state.steppingRunning;
+  }
+  
+  currentUIY += 50;
   
   // Cone mode selector
   fill(0);

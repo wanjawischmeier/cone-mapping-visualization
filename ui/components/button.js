@@ -1,3 +1,5 @@
+import { state } from '../../state.js';
+
 export function drawButton(label, x, y, w, h, disabled = false) {
     let isHovering = mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h;
 
@@ -18,5 +20,6 @@ export function drawButton(label, x, y, w, h, disabled = false) {
     textStyle(BOLD);
     text(label, x + w / 2, y + h / 2);
 
-    return !disabled && isHovering && mouseIsPressed;
+    // Only return true on click transition (not pressed -> pressed)
+    return !disabled && isHovering && mouseIsPressed && !state.prevMousePressed;
 }
