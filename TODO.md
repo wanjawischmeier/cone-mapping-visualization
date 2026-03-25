@@ -1,5 +1,5 @@
 - [ ] Dynamic positioning of iterationSlider
-- [ ] Split up ui and logic of cone stepping
+- [x] Split up ui and logic of cone stepping
 - [ ] Show height value above circle on hover
 - [x] Fix current step cone not showing
 - [ ] Do not show intersections if not showing ray

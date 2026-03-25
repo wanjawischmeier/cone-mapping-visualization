@@ -47,6 +47,7 @@ export const state = {
   prevMousePressed: false, // Track previous frame's mouse state for click detection
   currentIteration: 9, // Start at maximum (params.rayIterations - 1, with default rayIterations = 10)
   draggingIterationSlider: false, // Track if currently dragging iteration slider
+  steppingData: { stepPoints: [], currentConeIndex: -1, pointSpacing: 0 }, // Data from cone stepping algorithm
 };
 
 // Export convenience references that point to state object properties

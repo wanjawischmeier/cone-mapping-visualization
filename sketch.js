@@ -3,6 +3,7 @@ import { generateRandomHeightmap } from './heightmap.js';
 import { drawHeightmapVisualization } from './ui/visualization.js';
 import { createUIPanel, drawUIPanel } from './ui/ui.js';
 import { state } from './state.js';
+import { performConeStepping } from './coneStepping.js';
 
 // ============================================================================
 // SETUP & DRAW
@@ -26,6 +27,9 @@ function draw() {
   
   // Draw parameter sliders on the left
   drawUIPanel();
+  
+  // Update cone stepping data for visualization
+  performConeStepping();
   
   // Update previous frame's mouse state for click detection
   state.prevMousePressed = mouseIsPressed;

@@ -1,15 +1,15 @@
 import { params } from '../config.js';
-import { heightmap, coneMap, hoveredIndex, state, rayIntersections } from '../state.js';
+import { state } from '../state.js';
 import { drawHeightmapProfile, drawHeightmapPoints } from './components/heightmap.js';
 import { drawIterationSlider } from './components/iterationSlider.js';
-import { drawRayStepping } from './components/rayStepping.js';
+import { drawConeStepping } from './components/coneStepping.js';
 import { drawHoveredCone, drawRayIntersections, drawRay, clipLineToBox } from './components/shapes.js';
 
 // ============================================================================
 // VISUALIZATION
 // ============================================================================
 export function drawHeightmapVisualization() {
-  if (heightmap.length === 0) {
+  if (state.heightmap.length === 0) {
     fill(150);
     textAlign(CENTER, CENTER);
     text("Generate a heightmap to start", params.canvasWidth / 2 - params.uiPanelWidth, params.canvasHeight / 2);
@@ -18,7 +18,7 @@ export function drawHeightmapVisualization() {
 
   const viewHeight = params.canvasHeight - 2 * params.sideViewPadding;
   const viewWidth = params.canvasWidth - params.uiPanelWidth - 2 * params.sideViewPadding;
-  const pointSpacing = viewWidth / (heightmap.length - 1);
+  const pointSpacing = viewWidth / (state.heightmap.length - 1);
 
   // Draw background for visualization area
   fill(255);
@@ -43,14 +43,14 @@ export function drawHeightmapVisualization() {
     drawRay(params.sideViewPadding, params.sideViewPadding, viewWidth, viewHeight);
     // Draw ray stepping visualization if enabled
     if (state.uiState.showConeStepping) {
-      drawRayStepping(pointSpacing, viewHeight, viewWidth);
+      drawConeStepping(viewWidth, viewHeight);
     }
   }
 
   // Draw cone visualization and intersections if hovering
-  if (coneMap.length > 0 && state.hoveredIndex >= 0 && state.uiState.showHoveredCone) {
+  if (state.coneMap.length > 0 && state.hoveredIndex >= 0 && state.uiState.showHoveredCone) {
     state.rayIntersections.length = 0;
-    const intersections = state.ray.getIntersectionsWithCone(coneMap[state.hoveredIndex], pointSpacing, viewHeight, params.sideViewPadding);
+    const intersections = state.ray.getIntersectionsWithCone(state.coneMap[state.hoveredIndex], pointSpacing, viewHeight, params.sideViewPadding);
     state.rayIntersections.push(...intersections);
 
     drawHoveredCone(pointSpacing, viewHeight, viewWidth);
