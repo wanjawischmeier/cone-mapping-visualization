@@ -4,4 +4,5 @@
 - [x] Do not show intersections if not showing ray
 - [x] Run/Pause stepping
 - [ ] Clip intersection/stepping points to view area
-- [ ] Auto generate heightmaps on parameter changes
+- [x] Auto generate heightmaps on parameter changes
+- [ ] Remove green intersection points

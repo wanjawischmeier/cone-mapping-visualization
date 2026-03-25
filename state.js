@@ -45,6 +45,7 @@ export const state = {
   steppingRunning: false, // Whether cone stepping is actively running
   lastSteppingData: { stepPoints: [], currentConeIndex: -1, pointSpacing: 0 }, // Last stepping state when paused
   lastRay: { x1: 150, y1: 100, x2: 300, y2: 400 }, // Last ray position when paused
+  draggingSlider: {}, // Track which sliders are being dragged
 };
 
 // Export convenience references that point to state object properties
