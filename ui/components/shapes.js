@@ -67,14 +67,24 @@ export function drawRay(boxMinX, boxMinY, boxWidth, boxHeight) {
     circle(state.ray.x2, state.ray.y2, 16);
 }
 
-export function drawRayIntersections() {
+export function drawRayIntersections(viewWidth, viewHeight) {
     if (state.rayIntersections.length === 0) return;
+
+    // Define clipping bounds
+    const boxMinX = params.sideViewPadding;
+    const boxMinY = params.sideViewPadding;
+    const boxMaxX = params.sideViewPadding + viewWidth;
+    const boxMaxY = params.sideViewPadding + viewHeight;
 
     fill(0, 255, 0);
     noStroke();
 
     for (let intersection of state.rayIntersections) {
-        circle(intersection.x, intersection.y, 10);
+        // Only draw if within bounds
+        if (intersection.x >= boxMinX && intersection.x <= boxMaxX &&
+            intersection.y >= boxMinY && intersection.y <= boxMaxY) {
+            circle(intersection.x, intersection.y, 10);
+        }
     }
 }
 

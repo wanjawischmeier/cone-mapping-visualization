@@ -58,7 +58,7 @@ export function drawHeightmapVisualization() {
       state.rayIntersections.length = 0;
       const intersections = state.ray.getIntersectionsWithCone(state.coneMap[state.hoveredIndex], pointSpacing, viewHeight, params.sideViewPadding);
       state.rayIntersections.push(...intersections);
-      drawRayIntersections();
+      drawRayIntersections(viewWidth, viewHeight);
     }
   }
 

@@ -19,11 +19,14 @@ export function drawConeStepping(viewWidth, viewHeight) {
   // Draw all step points up to current iteration
   for (let i = 0; i < stepPoints.length; i++) {
     const pt = stepPoints[i];
-    const isCurrent = i === stepPoints.length - 1;
-    const stepColor = isCurrent ? [200, 100, 200] : [150, 150, 255];
-    fill(...stepColor);
-    noStroke();
-    circle(pt.x, pt.y, 8);
+    // Only draw if within bounds
+    if (pt.x >= boxMinX && pt.x <= boxMaxX && pt.y >= boxMinY && pt.y <= boxMaxY) {
+      const isCurrent = i === stepPoints.length - 1;
+      const stepColor = isCurrent ? [200, 100, 200] : [150, 150, 255];
+      fill(...stepColor);
+      noStroke();
+      circle(pt.x, pt.y, 8);
+    }
   }
 
   // For current iteration, draw its cone in purple
@@ -82,11 +85,14 @@ export function drawLastSteppingState(viewWidth, viewHeight) {
   // Draw all step points with low opacity
   for (let i = 0; i < stepPoints.length; i++) {
     const pt = stepPoints[i];
-    const isCurrent = i === stepPoints.length - 1;
-    const stepColor = isCurrent ? [200, 100, 200] : [150, 150, 255];
-    fill(...stepColor, opacity);
-    noStroke();
-    circle(pt.x, pt.y, 8);
+    // Only draw if within bounds
+    if (pt.x >= boxMinX && pt.x <= boxMaxX && pt.y >= boxMinY && pt.y <= boxMaxY) {
+      const isCurrent = i === stepPoints.length - 1;
+      const stepColor = isCurrent ? [200, 100, 200] : [150, 150, 255];
+      fill(...stepColor, opacity);
+      noStroke();
+      circle(pt.x, pt.y, 8);
+    }
   }
 
   // Draw the cone at the last position with low opacity

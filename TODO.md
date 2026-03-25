@@ -3,5 +3,7 @@
 - [x] Fix current step cone not showing
 - [x] Do not show intersections if not showing ray
 - [x] Run/Pause stepping
-- [ ] Clip intersection/stepping points to view area
+- [x] Clip intersection/stepping points to view area
 - [x] Auto generate heightmaps on parameter changes
+- [ ] How does interpolation work?
+- [ ] How does stepping stop work?
