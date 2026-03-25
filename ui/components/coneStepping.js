@@ -27,9 +27,11 @@ export function drawConeStepping(viewWidth, viewHeight) {
   }
 
   // For current iteration, draw its cone in purple
-  if (stepPoints.length > 1 && state.steppingData.currentConeIndex >= 0) {
+  if (stepPoints.length > 1 && state.steppingData.currentConeIndex >= 0 && state.steppingData.currentConeIndex < state.coneMap.length) {
     const closestIndex = state.steppingData.currentConeIndex;
     const cone = state.coneMap[closestIndex];
+    if (!cone || closestIndex >= state.heightmap.length) return; // Safety check
+    
     const coneX = params.sideViewPadding + closestIndex * pointSpacing;
     const coneHeightY = params.sideViewPadding + viewHeight_canvas - state.heightmap[closestIndex] * scaleFactor * viewHeight_canvas;
 
@@ -88,9 +90,11 @@ export function drawLastSteppingState(viewWidth, viewHeight) {
   }
 
   // Draw the cone at the last position with low opacity
-  if (stepPoints.length > 1 && state.lastSteppingData.currentConeIndex >= 0) {
+  if (stepPoints.length > 1 && state.lastSteppingData.currentConeIndex >= 0 && state.lastSteppingData.currentConeIndex < state.coneMap.length) {
     const closestIndex = state.lastSteppingData.currentConeIndex;
     const cone = state.coneMap[closestIndex];
+    if (!cone || closestIndex >= state.heightmap.length) return; // Safety check
+    
     const coneX = params.sideViewPadding + closestIndex * pointSpacing;
     const coneHeightY = params.sideViewPadding + viewHeight_canvas - state.heightmap[closestIndex] * scaleFactor * viewHeight_canvas;
 

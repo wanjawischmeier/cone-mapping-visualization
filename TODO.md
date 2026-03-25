@@ -2,5 +2,6 @@
 - [x] Show height value above circle on hover
 - [x] Fix current step cone not showing
 - [x] Do not show intersections if not showing ray
-- [ ] Run/Pause stepping
+- [x] Run/Pause stepping
 - [ ] Clip intersection/stepping points to view area
+- [ ] Auto generate heightmaps on parameter changes
