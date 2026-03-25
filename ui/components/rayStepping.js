@@ -124,21 +124,22 @@ export function drawRayStepping(pointSpacing, viewHeight, viewWidth) {
 
         const cone = coneMap[closestIndex];
         const coneX = params.sideViewPadding + closestIndex * pointSpacing;
-        const coneHeightY = params.sideViewPadding + viewHeight_canvas - heightmap[closestIndex] * scaleFactor * viewHeight_canvas;
+        const coneHeightY = params.sideViewPadding + viewHeight_canvas - state.heightmap[closestIndex] * scaleFactor * viewHeight_canvas;
 
-        const coneAngle = cone.angle;
         const effectiveViewHeight = viewHeight_canvas * scaleFactor;
-        const slopePixels = Math.tan(coneAngle) * (effectiveViewHeight / pointSpacing);
+        const leftSlopePixels = Math.tan(cone.leftAngle) * (effectiveViewHeight / pointSpacing);
+        const rightSlopePixels = Math.tan(cone.rightAngle) * (effectiveViewHeight / pointSpacing);
 
-        // Draw cone edges in purple
-        const leftEdge = clipLineToBox(coneX, coneHeightY, -1, -slopePixels, boxMinX, boxMinY, boxMaxX, boxMaxY);
+        // Draw left cone edge in purple
+        const leftEdge = clipLineToBox(coneX, coneHeightY, -1, -leftSlopePixels, boxMinX, boxMinY, boxMaxX, boxMaxY);
         if (leftEdge) {
             stroke(200, 100, 200);
             strokeWeight(2);
             line(leftEdge.startX, leftEdge.startY, leftEdge.endX, leftEdge.endY);
         }
 
-        const rightEdge = clipLineToBox(coneX, coneHeightY, 1, -slopePixels, boxMinX, boxMinY, boxMaxX, boxMaxY);
+        // Draw right cone edge in purple
+        const rightEdge = clipLineToBox(coneX, coneHeightY, 1, -rightSlopePixels, boxMinX, boxMinY, boxMaxX, boxMaxY);
         if (rightEdge) {
             stroke(200, 100, 200);
             strokeWeight(2);
