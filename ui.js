@@ -60,13 +60,13 @@ function drawUIPanel() {
   
   // Toggle Ray visibility
   if (drawCheckbox("Show Ray", uiState.showRay, uiPanelX + 10, currentUIY)) {
-    uiState.showRay = !uiState.showRay;
+    uiState.toggleRay();
   }
   currentUIY += 30;
   
   // Toggle Ray-Cone Intersections visibility
   if (drawCheckbox("Show Intersections", uiState.showIntersections, uiPanelX + 10, currentUIY)) {
-    uiState.showIntersections = !uiState.showIntersections;
+    uiState.toggleIntersections();
   }
   currentUIY += 30;
   

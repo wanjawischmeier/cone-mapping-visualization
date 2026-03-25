@@ -1,4 +1,30 @@
 // ============================================================================
+// CONE CLASS
+// ============================================================================
+class Cone {
+  constructor(height, angle, radius, index) {
+    this.height = height;
+    this.angle = angle;
+    this.radius = radius;
+    this.index = index;
+  }
+
+  // Create from height and slope
+  static fromSlope(height, maxSlope, index) {
+    const radius = maxSlope > 0 ? 1.0 / maxSlope : 1.0;
+    const angle = Math.atan(maxSlope);
+    return new Cone(height, angle, radius, index);
+  }
+
+  // Get screen position for this cone in the visualization
+  getScreenPosition(pointSpacing, viewHeight, sideViewPadding) {
+    const x = sideViewPadding + this.index * pointSpacing;
+    const y = sideViewPadding + viewHeight - this.height * (params.heightmapScale / 100) * viewHeight;
+    return { x, y };
+  }
+}
+
+// ============================================================================
 // CONE MAP GENERATION
 // ============================================================================
 function generateConeMap() {
@@ -27,16 +53,8 @@ function generateConeMap() {
       maxSlope = Math.max(maxSlope, slope);
     }
 
-    // maxSlope is the tangent of the cone half-angle
-    // cone radius in data space = 1.0 / maxSlope (inverted for visualization)
-    const coneRadius = maxSlope > 0 ? 1.0 / maxSlope : 1.0;
-
-    coneMap.push({
-      height: heightmap[i],
-      angle: Math.atan(maxSlope),
-      radius: coneRadius,
-      index: i
-    });
+    // Create cone using the factory method
+    coneMap.push(Cone.fromSlope(heightmap[i], maxSlope, i));
   }
   
   console.log("Generated cone map with proper cone stepping slopes");

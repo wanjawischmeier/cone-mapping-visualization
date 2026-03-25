@@ -40,12 +40,7 @@ function drawHeightmapVisualization() {
 
   // Draw cone visualization and intersections if hovering
   if (coneMap !== undefined && hoveredIndex >= 0 && uiState.showHoveredCone) {
-    rayIntersections = rayConeConeIntersection(ray.x1, ray.y1, ray.x2, ray.y2,
-      params.sideViewPadding + hoveredIndex * pointSpacing,
-      params.sideViewPadding + viewHeight - heightmap[hoveredIndex] * (params.heightmapScale / 100) * viewHeight,
-      coneMap[hoveredIndex].angle,
-      pointSpacing,
-      viewHeight);
+    rayIntersections = ray.getIntersectionsWithCone(coneMap[hoveredIndex], pointSpacing, viewHeight, params.sideViewPadding);
 
     drawHoveredCone(pointSpacing, viewHeight, viewWidth);
 
@@ -334,14 +329,8 @@ function drawRayStepping(pointSpacing, viewHeight, viewWidth) {
     const infiniteRayX2 = currentX + rayUx * 10000;
     const infiniteRayY2 = currentY + rayUy * 10000;
 
-    const intersections = rayConeConeIntersection(
-      currentX, currentY,
-      infiniteRayX2, infiniteRayY2,
-      coneX, coneHeightY,
-      cone.angle,
-      pointSpacing,
-      viewHeight_canvas
-    );
+    const stepRay = new Ray(currentX, currentY, infiniteRayX2, infiniteRayY2);
+    const intersections = stepRay.getIntersectionsWithCone(cone, pointSpacing, viewHeight_canvas, params.sideViewPadding);
     
     // Find the closest intersection point ahead on the ray in the ray direction
     if (intersections.length > 0) {

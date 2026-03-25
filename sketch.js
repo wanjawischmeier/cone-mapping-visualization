@@ -36,9 +36,10 @@ function mouseDragged() {
   
   // Check if we should start dragging
   if (draggingRayPoint === -1) {
-    if (dist(adjustedMouseX, mouseY, ray.x1, ray.y1) < dragRadius) {
+    const nearPoints = ray.isNearPoint(adjustedMouseX, mouseY, dragRadius);
+    if (nearPoints.point1) {
       draggingRayPoint = 0;
-    } else if (dist(adjustedMouseX, mouseY, ray.x2, ray.y2) < dragRadius) {
+    } else if (nearPoints.point2) {
       draggingRayPoint = 1;
     }
   }
@@ -53,11 +54,9 @@ function mouseDragged() {
   
   // Update ray point if dragging, with bounds checking
   if (draggingRayPoint === 0) {
-    ray.x1 = constrain(adjustedMouseX, minX, maxX);
-    ray.y1 = constrain(mouseY, minY, maxY);
+    ray.setPoint1(constrain(adjustedMouseX, minX, maxX), constrain(mouseY, minY, maxY));
   } else if (draggingRayPoint === 1) {
-    ray.x2 = constrain(adjustedMouseX, minX, maxX);
-    ray.y2 = constrain(mouseY, minY, maxY);
+    ray.setPoint2(constrain(adjustedMouseX, minX, maxX), constrain(mouseY, minY, maxY));
   }
 }
 
