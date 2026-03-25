@@ -47,16 +47,17 @@ export function drawHeightmapVisualization() {
     }
   }
 
-  // Draw cone visualization and intersections if hovering
+  // Draw cone visualization (always show hovered cone if hovering)
   if (state.coneMap.length > 0 && state.hoveredIndex >= 0 && state.uiState.showHoveredCone) {
-    state.rayIntersections.length = 0;
-    const intersections = state.ray.getIntersectionsWithCone(state.coneMap[state.hoveredIndex], pointSpacing, viewHeight, params.sideViewPadding);
-    state.rayIntersections.push(...intersections);
-
     drawHoveredCone(pointSpacing, viewHeight, viewWidth);
 
-    // Always draw ray-cone intersections
-    drawRayIntersections();
+    // Only show intersections if ray is also visible
+    if (state.uiState.showRay) {
+      state.rayIntersections.length = 0;
+      const intersections = state.ray.getIntersectionsWithCone(state.coneMap[state.hoveredIndex], pointSpacing, viewHeight, params.sideViewPadding);
+      state.rayIntersections.push(...intersections);
+      drawRayIntersections();
+    }
   }
 
   function updateHoveredIndexFromMouse(pointSpacing, viewHeight, viewWidth) {
