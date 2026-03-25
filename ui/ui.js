@@ -4,6 +4,7 @@ import { generateRandomHeightmap } from '../heightmap.js';
 import { generateConeMap } from '../coneMap.js';
 import { drawButton } from './components/button.js';
 import { drawSlider } from './components/slider.js';
+import { saveState } from '../storage.js';
 
 // Helper: Detect if mouse clicked (transition from not pressed to pressed)
 function isMouseClicked(x, y, w, h) {
@@ -114,6 +115,8 @@ export function drawUIPanel() {
   if (isMouseClicked(uiPanelX + 10, currentUIY, modeButtonWidth, 20)) {
     params.coneMode = 'isotropic';
     state.coneMap.length = 0;
+    generateConeMap();
+    saveState();
   }
 
   // Anisotropic button
@@ -130,6 +133,8 @@ export function drawUIPanel() {
   if (isMouseClicked(uiPanelX + 20 + modeButtonWidth, currentUIY, modeButtonWidth, 20)) {
     params.coneMode = 'anisotropic';
     state.coneMap.length = 0;
+    generateConeMap();
+    saveState();
   }
 
   currentUIY += 40;
@@ -137,6 +142,7 @@ export function drawUIPanel() {
   // Toggle Ray visibility
   if (drawCheckbox("Show Ray", state.uiState.showRay, uiPanelX + 10, currentUIY)) {
     state.uiState.toggleRay();
+    saveState();
   }
   currentUIY += 30;
 
@@ -144,6 +150,7 @@ export function drawUIPanel() {
   const coneSteppingDisabled = !state.uiState.showRay || coneMap.length === 0;
   if (drawCheckbox("Show Cone Stepping", state.uiState.showConeStepping, uiPanelX + 10, currentUIY, coneSteppingDisabled)) {
     state.uiState.toggleConeStepping();
+    saveState();
   }
   currentUIY += 30;
 
@@ -151,6 +158,7 @@ export function drawUIPanel() {
   const hoveredConeDisabled = coneMap.length === 0;
   if (drawCheckbox("Show Hovered Cone", state.uiState.showHoveredCone, uiPanelX + 10, currentUIY, hoveredConeDisabled)) {
     state.uiState.toggleHoveredCone();
+    saveState();
   }
   currentUIY += 50;
 
@@ -168,24 +176,27 @@ export function drawUIPanel() {
   const sliderWidth = params.uiPanelWidth - 20;
   currentUIY = drawSlider("Resolution:", params.heightmapResolution, 10, 100, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
     params.heightmapResolution = Math.floor(val);
-  }, generateRandomHeightmap);
+  }, () => { generateRandomHeightmap(); saveState(); });
 
   currentUIY = drawSlider("Height Scale:", params.heightmapScale, 10, 200, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
     params.heightmapScale = val;
-  }, generateRandomHeightmap);
+  }, () => { generateRandomHeightmap(); saveState(); });
 
   currentUIY = drawSlider("Point Size:", params.pointSize, 3, 15, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
     params.pointSize = val;
+    saveState();
   });
 
   currentUIY = drawSlider("Line Weight:", params.lineWeight, 1, 5, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
     params.lineWeight = val;
+    saveState();
   });
 
   currentUIY = drawSlider("Max Iterations (n):", params.rayIterations, 1, 50, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
     const previousMax = params.rayIterations;
     params.rayIterations = Math.floor(val);
-
+    saveState();
+    
     // If slider was at maximum, jump it to the new maximum
     if (state.currentIteration === previousMax - 1) {
       state.currentIteration = params.rayIterations - 1;
@@ -197,15 +208,15 @@ export function drawUIPanel() {
 
   currentUIY = drawSlider("Slope Start:", params.heightmapSlopeStart, -1, 1, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
     params.heightmapSlopeStart = val;
-  }, generateRandomHeightmap);
+  }, () => { generateRandomHeightmap(); saveState(); });
 
   currentUIY = drawSlider("Slope End:", params.heightmapSlopeEnd, -1, 1, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
     params.heightmapSlopeEnd = val;
-  }, generateRandomHeightmap);
+  }, () => { generateRandomHeightmap(); saveState(); });
 
   currentUIY = drawSlider("Noise Power:", params.heightmapNoisePower, 0, 1, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
     params.heightmapNoisePower = val;
-  }, generateRandomHeightmap);
+  }, () => { generateRandomHeightmap(); saveState(); });
 }
 
 

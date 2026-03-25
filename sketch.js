@@ -4,12 +4,18 @@ import { drawHeightmapVisualization } from './ui/visualization.js';
 import { createUIPanel, drawUIPanel } from './ui/ui.js';
 import { state } from './state.js';
 import { performConeStepping } from './coneStepping.js';
+import { loadState, saveState } from './storage.js';
+import { generateConeMap } from './coneMap.js';
 
 function setup() {
   createCanvas(params.canvasWidth, params.canvasHeight);
+  
+  // Load saved state from localStorage
+  const stateLoaded = loadState();
+  
   createUIPanel();
   
-  // Generate initial heightmap
+  // Generate initial heightmap only
   generateRandomHeightmap();
 }
 
@@ -68,6 +74,10 @@ function mouseDragged() {
 }
 
 function mouseReleased() {
+  // Save ray position when released
+  if (state.draggingRayPoint !== -1) {
+    saveState();
+  }
   state.draggingRayPoint = -1;
 }
 

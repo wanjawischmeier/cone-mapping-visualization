@@ -7,3 +7,4 @@
 - [x] Auto generate heightmaps on parameter changes
 - [ ] How does interpolation work?
 - [ ] How does stepping stop work?
+- [x] Store parameters in local storage
