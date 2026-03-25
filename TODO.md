@@ -1,4 +1,4 @@
 - [x] Split up ui and logic of cone stepping
-- [ ] Show height value above circle on hover
+- [x] Show height value above circle on hover
 - [x] Fix current step cone not showing
 - [x] Do not show intersections if not showing ray
