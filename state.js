@@ -1,51 +1,51 @@
 import { Ray } from './ray.js';
 
 export class UIState {
-  constructor() {
-    this.showRay = true;
-    this.showConeStepping = true;
-    this.showHoveredCone = false;
-  }
+	constructor() {
+		this.showRay = true;
+		this.showConeStepping = true;
+		this.showHoveredCone = false;
+	}
 
-  // Toggle ray visibility
-  toggleRay() {
-    this.showRay = !this.showRay;
-  }
+	// Toggle ray visibility
+	toggleRay() {
+		this.showRay = !this.showRay;
+	}
 
-  // Toggle cone stepping visibility
-  toggleConeStepping() {
-    this.showConeStepping = !this.showConeStepping;
-  }
+	// Toggle cone stepping visibility
+	toggleConeStepping() {
+		this.showConeStepping = !this.showConeStepping;
+	}
 
-  // Toggle hovered cone visibility
-  toggleHoveredCone() {
-    this.showHoveredCone = !this.showHoveredCone;
-  }
+	// Toggle hovered cone visibility
+	toggleHoveredCone() {
+		this.showHoveredCone = !this.showHoveredCone;
+	}
 
-  // Reset to defaults
-  reset() {
-    this.showRay = true;
-    this.showConeStepping = true;
-    this.showHoveredCone = false;
-  }
+	// Reset to defaults
+	reset() {
+		this.showRay = true;
+		this.showConeStepping = true;
+		this.showHoveredCone = false;
+	}
 }
 
 export const state = {
-  heightmap: [],
-  coneMap: [],
-  hoveredIndex: -1,
-  ray: new Ray(150, 100, 300, 400),
-  draggingRayPoint: -1, // -1 = not dragging, 0 = point1, 1 = point2
-  rayIntersections: [], // Array of intersection objects
-  uiState: new UIState(),
-  prevMousePressed: false, // Track previous frame's mouse state for click detection
-  currentIteration: 9, // Start at maximum (params.rayIterations - 1, with default rayIterations = 10)
-  draggingIterationSlider: false, // Track if currently dragging iteration slider
-  steppingData: { stepPoints: [], currentConeIndex: -1, pointSpacing: 0 }, // Data from cone stepping algorithm
-  steppingRunning: false, // Whether cone stepping is actively running
-  lastSteppingData: { stepPoints: [], currentConeIndex: -1, pointSpacing: 0 }, // Last stepping state when paused
-  lastRay: { x1: 150, y1: 100, x2: 300, y2: 400 }, // Last ray position when paused
-  draggingSlider: {}, // Track which sliders are being dragged
+	heightmap: [],
+	coneMap: [],
+	hoveredIndex: -1,
+	ray: new Ray(150, 100, 300, 400),
+	draggingRayPoint: -1, // -1 = not dragging, 0 = point1, 1 = point2
+	rayIntersections: [], // Array of intersection objects
+	uiState: new UIState(),
+	prevMousePressed: false, // Track previous frame's mouse state for click detection
+	currentIteration: 9, // Start at maximum (params.rayIterations - 1, with default rayIterations = 10)
+	draggingIterationSlider: false, // Track if currently dragging iteration slider
+	steppingData: { stepPoints: [], currentConeIndex: -1, pointSpacing: 0 }, // Data from cone stepping algorithm
+	steppingRunning: false, // Whether cone stepping is actively running
+	lastSteppingData: { stepPoints: [], currentConeIndex: -1, pointSpacing: 0 }, // Last stepping state when paused
+	lastRay: { x1: 150, y1: 100, x2: 300, y2: 400 }, // Last ray position when paused
+	draggingSlider: {}, // Track which sliders are being dragged
 };
 
 // Export convenience references that point to state object properties
