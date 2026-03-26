@@ -15,6 +15,6 @@ export function generateRandomHeightmap() {
 	}
 	state.coneMap.length = 0; // Reset cone map when generating new heightmap
 	state.hoveredIndex = -1;
-	state.steppingData = { stepPoints: [], currentConeIndex: -1, pointSpacing: 0 }; // Clear current stepping data
-	state.lastSteppingData = { stepPoints: [], currentConeIndex: -1, pointSpacing: 0 }; // Clear last stepping data
+	state.steppingData = { stepPoints: [], currentConeIndex: -1, pointSpacing: 0, t_save_point: null, t_fail_point: null, has_hit: false }; // Clear current stepping data
+	state.lastSteppingData = { stepPoints: [], currentConeIndex: -1, pointSpacing: 0, t_save_point: null, t_fail_point: null, has_hit: false }; // Clear last stepping data
 }

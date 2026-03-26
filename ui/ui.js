@@ -80,10 +80,13 @@ export function drawUIPanel() {
 			state.lastSteppingData = {
 				stepPoints: [...state.steppingData.stepPoints],
 				currentConeIndex: state.steppingData.currentConeIndex,
-				pointSpacing: state.steppingData.pointSpacing
+				pointSpacing: state.steppingData.pointSpacing,
+				t_save_point: state.steppingData.t_save_point,
+				t_fail_point: state.steppingData.t_fail_point,
+				has_hit: state.steppingData.has_hit
 			};
 			// Clear current stepping data so only last state is shown
-			state.steppingData = { stepPoints: [], currentConeIndex: -1, pointSpacing: 0 };
+			state.steppingData = { stepPoints: [], currentConeIndex: -1, pointSpacing: 0, t_save_point: null, t_fail_point: null, has_hit: false };
 		}
 		state.steppingRunning = !state.steppingRunning;
 	}

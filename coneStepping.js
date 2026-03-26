@@ -14,40 +14,24 @@ export function performConeStepping() {
     const viewHeight_canvas = params.canvasHeight - 2 * params.sideViewPadding;
     const scaleFactor = params.heightmapScale / 100;
 
-    // Perform stepping iterations
-    const stepPoints = [{ x: state.ray.x1, y: state.ray.y1, coneIndex: -1 }];
-    let currentX = state.ray.x1;
-    let currentY = state.ray.y1;
-    let lastUsedIndex = -1;
-
-    for (let step = 0; step < state.currentIteration; step++) {
-        const result = performSteppingIteration(
-            currentX,
-            currentY,
-            lastUsedIndex,
-            pointSpacing,
-            viewHeight_canvas,
-            scaleFactor
-        );
-
-        if (!result) {
-            break; // No valid intersection found
-        }
-
-        currentX = result.x;
-        currentY = result.y;
-        lastUsedIndex = result.coneIndex;
-        stepPoints.push({ x: currentX, y: currentY, coneIndex: result.coneIndex });
-    }
-
-    // Find the cone index at the final position
-    const currentConeIndex = findCurrentConeIndex(currentX, pointSpacing);
+    // Perform stepping iterations with proper termination
+    const steppingResult = performSteppingWithTermination(
+        state.ray.x1,
+        state.ray.y1,
+        pointSpacing,
+        viewHeight_canvas,
+        scaleFactor
+    );
 
     // Store stepping data in state
     state.steppingData = {
-        stepPoints,
-        currentConeIndex,
-        pointSpacing
+        stepPoints: steppingResult.stepPoints,
+        currentConeIndex: steppingResult.currentConeIndex,
+        pointSpacing,
+        t_save_point: steppingResult.t_save_point,
+        t_fail_point: steppingResult.t_fail_point,
+        has_hit: steppingResult.has_hit,
+        maxIterationsTaken: steppingResult.stepPoints.length - 1  // Number of actual steps taken
     };
 }
 
@@ -81,33 +65,69 @@ function findClosestHeightmapIndex(xPos, pointSpacing, excludeIndex = -1) {
     return closestIndex;
 }
 
-// Perform a single stepping iteration
-function performSteppingIteration(currentX, currentY, lastUsedIndex, pointSpacing, viewHeight_canvas, scaleFactor) {
-    // Find closest heightmap point (but different from last used index)
-    const closestIndex = findClosestHeightmapIndex(currentX, pointSpacing, lastUsedIndex);
+// Perform stepping with proper termination at first surface hit
+function performSteppingWithTermination(rayX1, rayY1, pointSpacing, viewHeight_canvas, scaleFactor) {
+    const stepPoints = [{ x: rayX1, y: rayY1, coneIndex: -1 }];
+    
+    let currentX = rayX1;
+    let currentY = rayY1;
+    let t_save_point = { x: rayX1, y: rayY1, coneIndex: -1 }; // Start is always safe
+    let t_fail_point = null;
+    let has_hit = false;
 
-    // Get cone at this point
-    const cone = state.coneMap[closestIndex];
-    const coneX = params.sideViewPadding + closestIndex * pointSpacing;
-    const coneHeightY = params.sideViewPadding + viewHeight_canvas - state.heightmap[closestIndex] * scaleFactor * viewHeight_canvas;
+    const rayDx = state.ray.x2 - state.ray.x1;
+    const rayDy = state.ray.y2 - state.ray.y1;
+    const rayLen = Math.sqrt(rayDx * rayDx + rayDy * rayDy);
+    const rayUx = rayLen > 0 ? rayDx / rayLen : 0;
+    const rayUy = rayLen > 0 ? rayDy / rayLen : 0;
 
-    // Calculate intersection point along the ray
-    const intersection = calculateIntersectionAlongRay(
-        currentX,
-        currentY,
-        cone,
-        pointSpacing,
-        viewHeight_canvas
-    );
+    for (let step = 0; step < params.rayIterations; step++) {
+        // 1. Find cone & compute step
+        const closestIndex = findClosestHeightmapIndex(currentX, pointSpacing);
+        const cone = state.coneMap[closestIndex];
+        const intersection = calculateIntersectionAlongRay(currentX, currentY, cone, pointSpacing, viewHeight_canvas);
+        
+        if (!intersection) {
+            // Cone step failed → MISS (not a surface hit)
+            break;
+        }
 
-    if (!intersection) {
-        return null; // No valid intersection
+        // 2. COMPUTE RAY HEIGHT at new position
+        const newX = intersection.x;
+        const newY = intersection.y;
+        const closestHeightIndex = findClosestHeightmapIndex(newX, pointSpacing);
+        const surfaceHeightNormalized = state.heightmap[closestHeightIndex];
+        const surfaceHeightCanvas = params.sideViewPadding + viewHeight_canvas - surfaceHeightNormalized * scaleFactor * viewHeight_canvas;
+
+        // 3. LINEAR interpolation along the ray to find its Y at newX
+        const rayXRange = state.ray.x2 - state.ray.x1;
+        const rayYRange = state.ray.y2 - state.ray.y1;
+        const fraction = rayXRange !== 0 ? (newX - state.ray.x1) / rayXRange : 0;
+        const rayHeightAtNewX = state.ray.y1 + fraction * rayYRange;
+
+        // 4. HEIGHT TEST - THIS IS YOUR STOP CONDITION
+        if (rayHeightAtNewX >= surfaceHeightCanvas) {
+            // FIRST FAILURE → perfect bracket!
+            if (!has_hit) {
+                t_fail_point = { x: newX, y: newY, coneIndex: closestHeightIndex };
+                has_hit = true;
+            }
+            break; // Stop coarse stepping
+        }
+        
+        // 5. SUCCESSFUL STEP - update safe position
+        t_save_point = { x: newX, y: newY, coneIndex: closestHeightIndex };
+        currentX = newX;
+        currentY = newY;
+        stepPoints.push({ x: currentX, y: currentY, coneIndex: closestIndex });
     }
 
     return {
-        x: intersection.x,
-        y: intersection.y,
-        coneIndex: closestIndex
+        stepPoints,
+        currentConeIndex: -1,
+        t_save_point,
+        t_fail_point,
+        has_hit
     };
 }
 
@@ -147,13 +167,4 @@ function calculateIntersectionAlongRay(currentX, currentY, cone, pointSpacing, v
     }
 
     return closestIntersection;
-}
-
-// Find the cone index at the current position
-function findCurrentConeIndex(currentX, pointSpacing) {
-    if (state.steppingData.stepPoints.length <= 1) {
-        return -1;
-    }
-
-    return findClosestHeightmapIndex(currentX, pointSpacing);
 }

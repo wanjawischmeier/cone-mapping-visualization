@@ -7,6 +7,20 @@ export function drawIterationSlider() {
 	const labelX = params.sideViewPadding + 10;
 	const sliderX = labelX + 80;
 
+	// Get the max iterations parameter (from the control panel slider)
+	const maxIterationsParam = params.rayIterations - 1;
+	
+	// Get actual iterations taken by the algorithm
+	const maxIterationsTaken = state.steppingData?.maxIterationsTaken || 0;
+	
+	// The display max is the actual iterations taken (limited by the param)
+	const displayMax = Math.min(maxIterationsTaken, maxIterationsParam);
+
+	// Clamp current iteration to valid range
+	if (state.currentIteration > displayMax) {
+		state.currentIteration = displayMax;
+	}
+
 	// Draw label
 	fill(0);
 	noStroke();
@@ -35,13 +49,13 @@ export function drawIterationSlider() {
 	// Dragging logic
 	if (state.draggingIterationSlider && mouseIsPressed) {
 		const ratio = Math.max(0, Math.min(1, (adjustedMouseX - sliderX) / sliderWidth));
-		state.currentIteration = Math.floor(ratio * (params.rayIterations - 1));
+		state.currentIteration = Math.floor(ratio * displayMax);
 	} else if (!mouseIsPressed) {
 		state.draggingIterationSlider = false;
 	}
 
 	// Draw slider thumb
-	const thumbX = map(state.currentIteration, 0, params.rayIterations - 1, sliderX, sliderX + sliderWidth);
+	const thumbX = displayMax > 0 ? map(state.currentIteration, 0, displayMax, sliderX, sliderX + sliderWidth) : sliderX;
 	fill(state.draggingIterationSlider ? 60 : 100);
 	noStroke();
 	rect(thumbX - 5, sliderY, 10, 20);
@@ -51,5 +65,5 @@ export function drawIterationSlider() {
 	noStroke();
 	textSize(10);
 	textAlign(LEFT, CENTER);
-	text(state.currentIteration + " / " + (params.rayIterations - 1), sliderX + sliderWidth + 10, sliderY + 10);
+	text(state.currentIteration + " / " + displayMax, sliderX + sliderWidth + 10, sliderY + 10);
 }

@@ -91,8 +91,8 @@ export function generateConeMap() {
 	console.log(`Generated ${params.coneMode} cone map`);
 
 	// Clear stepping data when new cone map is generated
-	state.steppingData = { stepPoints: [], currentConeIndex: -1, pointSpacing: 0 };
-	state.lastSteppingData = { stepPoints: [], currentConeIndex: -1, pointSpacing: 0 };
+	state.steppingData = { stepPoints: [], currentConeIndex: -1, pointSpacing: 0, t_save_point: null, t_fail_point: null, has_hit: false };
+	state.lastSteppingData = { stepPoints: [], currentConeIndex: -1, pointSpacing: 0, t_save_point: null, t_fail_point: null, has_hit: false };
 
 	// Enable cone stepping when cone map is generated
 	state.steppingRunning = true;

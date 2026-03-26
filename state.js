@@ -41,9 +41,9 @@ export const state = {
 	prevMousePressed: false, // Track previous frame's mouse state for click detection
 	currentIteration: 9, // Start at maximum (params.rayIterations - 1, with default rayIterations = 10)
 	draggingIterationSlider: false, // Track if currently dragging iteration slider
-	steppingData: { stepPoints: [], currentConeIndex: -1, pointSpacing: 0 }, // Data from cone stepping algorithm
+	steppingData: { stepPoints: [], currentConeIndex: -1, pointSpacing: 0, t_save_point: null, t_fail_point: null, has_hit: false }, // Data from cone stepping algorithm
 	steppingRunning: false, // Whether cone stepping is actively running
-	lastSteppingData: { stepPoints: [], currentConeIndex: -1, pointSpacing: 0 }, // Last stepping state when paused
+	lastSteppingData: { stepPoints: [], currentConeIndex: -1, pointSpacing: 0, t_save_point: null, t_fail_point: null, has_hit: false }, // Last stepping state when paused
 	lastRay: { x1: 150, y1: 100, x2: 300, y2: 400 }, // Last ray position when paused
 	draggingSlider: {}, // Track which sliders are being dragged
 };

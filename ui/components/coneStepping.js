@@ -16,54 +16,105 @@ export function drawConeStepping(viewWidth, viewHeight) {
 
 	const stepPoints = state.steppingData.stepPoints;
 
-	// Draw all step points up to current iteration
+	// Draw ALL step points (always show the full path)
 	for (let i = 0; i < stepPoints.length; i++) {
 		const pt = stepPoints[i];
 		// Only draw if within bounds
 		if (pt.x >= boxMinX && pt.x <= boxMaxX && pt.y >= boxMinY && pt.y <= boxMaxY) {
-			const isCurrent = i === stepPoints.length - 1;
-			const stepColor = isCurrent ? [200, 100, 200] : [150, 150, 255];
+			const stepColor = [150, 150, 255]; // Blue for all points
 			fill(...stepColor);
 			noStroke();
-			circle(pt.x, pt.y, 8);
+			circle(pt.x, pt.y, 6);
 		}
 	}
 
-	// For current iteration, draw its cone in purple
-	if (stepPoints.length > 1 && state.steppingData.currentConeIndex >= 0 && state.steppingData.currentConeIndex < state.coneMap.length) {
-		const closestIndex = state.steppingData.currentConeIndex;
-		const cone = state.coneMap[closestIndex];
-		if (!cone || closestIndex >= state.heightmap.length) return; // Safety check
-
-		const coneX = params.sideViewPadding + closestIndex * pointSpacing;
-		const coneHeightY = params.sideViewPadding + viewHeight_canvas - state.heightmap[closestIndex] * scaleFactor * viewHeight_canvas;
-
-		const effectiveViewHeight = viewHeight_canvas * scaleFactor;
-		const leftSlopePixels = Math.tan(cone.leftAngle) * (effectiveViewHeight / pointSpacing);
-		const rightSlopePixels = Math.tan(cone.rightAngle) * (effectiveViewHeight / pointSpacing);
-
-		// Draw left cone edge in purple
-		const leftEdge = clipLineToBox(coneX, coneHeightY, -1, -leftSlopePixels, boxMinX, boxMinY, boxMaxX, boxMaxY);
-		if (leftEdge) {
-			stroke(200, 100, 200);
-			strokeWeight(2);
-			line(leftEdge.startX, leftEdge.startY, leftEdge.endX, leftEdge.endY);
+	// Draw t_save point (last known safe position) in green
+	if (state.steppingData.t_save_point) {
+		const pt = state.steppingData.t_save_point;
+		if (pt.x >= boxMinX && pt.x <= boxMaxX && pt.y >= boxMinY && pt.y <= boxMaxY) {
+			fill(100, 255, 100);
+			noStroke();
+			circle(pt.x, pt.y, 10);
 		}
+	}
 
-		// Draw right cone edge in purple
-		const rightEdge = clipLineToBox(coneX, coneHeightY, 1, -rightSlopePixels, boxMinX, boxMinY, boxMaxX, boxMaxY);
-		if (rightEdge) {
-			stroke(200, 100, 200);
-			strokeWeight(2);
-			line(rightEdge.startX, rightEdge.startY, rightEdge.endX, rightEdge.endY);
+	// Draw t_fail point (first failure position) in red
+	if (state.steppingData.t_fail_point) {
+		const pt = state.steppingData.t_fail_point;
+		if (pt.x >= boxMinX && pt.x <= boxMaxX && pt.y >= boxMinY && pt.y <= boxMaxY) {
+			fill(255, 100, 100);
+			noStroke();
+			circle(pt.x, pt.y, 10);
 		}
+	}
 
-		// Apex point
-		fill(200, 100, 200);
-		noStroke();
-		circle(coneX, coneHeightY, 6);
+	// Draw cone at current iteration
+	if (state.currentIteration >= 0 && state.currentIteration < stepPoints.length) {
+		const currentPt = stepPoints[state.currentIteration];
+		const currentConeIndex = currentPt.coneIndex !== undefined ? currentPt.coneIndex : state.steppingData.currentConeIndex;
+
+		if (currentConeIndex >= 0 && currentConeIndex < state.coneMap.length) {
+			const cone = state.coneMap[currentConeIndex];
+			if (cone && currentConeIndex < state.heightmap.length) {
+				drawConeAt(currentConeIndex, cone, pointSpacing, viewHeight_canvas, scaleFactor, [200, 100, 200], boxMinX, boxMinY, boxMaxX, boxMaxY);
+			}
+		}
+	}
+
+	// Draw cone at t_save (green with reduced opacity)
+	if (state.steppingData.t_save_point && state.steppingData.t_save_point.coneIndex !== undefined) {
+		const coneIndex = state.steppingData.t_save_point.coneIndex;
+		if (coneIndex >= 0 && coneIndex < state.coneMap.length) {
+			const cone = state.coneMap[coneIndex];
+			if (cone && coneIndex < state.heightmap.length) {
+				drawConeAt(coneIndex, cone, pointSpacing, viewHeight_canvas, scaleFactor, [100, 255, 100, 80], boxMinX, boxMinY, boxMaxX, boxMaxY);
+			}
+		}
+	}
+
+	// Draw cone at t_fail (red with reduced opacity)
+	if (state.steppingData.t_fail_point && state.steppingData.t_fail_point.coneIndex !== undefined) {
+		const coneIndex = state.steppingData.t_fail_point.coneIndex;
+		if (coneIndex >= 0 && coneIndex < state.coneMap.length) {
+			const cone = state.coneMap[coneIndex];
+			if (cone && coneIndex < state.heightmap.length) {
+				drawConeAt(coneIndex, cone, pointSpacing, viewHeight_canvas, scaleFactor, [255, 100, 100, 80], boxMinX, boxMinY, boxMaxX, boxMaxY);
+			}
+		}
 	}
 }
+
+// Helper function to draw a cone at a specific index
+function drawConeAt(coneIndex, cone, pointSpacing, viewHeight_canvas, scaleFactor, color, boxMinX, boxMinY, boxMaxX, boxMaxY) {
+	const coneX = params.sideViewPadding + coneIndex * pointSpacing;
+	const coneHeightY = params.sideViewPadding + viewHeight_canvas - state.heightmap[coneIndex] * scaleFactor * viewHeight_canvas;
+
+	const effectiveViewHeight = viewHeight_canvas * scaleFactor;
+	const leftSlopePixels = Math.tan(cone.leftAngle) * (effectiveViewHeight / pointSpacing);
+	const rightSlopePixels = Math.tan(cone.rightAngle) * (effectiveViewHeight / pointSpacing);
+
+	// Draw left cone edge
+	const leftEdge = clipLineToBox(coneX, coneHeightY, -1, -leftSlopePixels, boxMinX, boxMinY, boxMaxX, boxMaxY);
+	if (leftEdge) {
+		stroke(...color);
+		strokeWeight(2);
+		line(leftEdge.startX, leftEdge.startY, leftEdge.endX, leftEdge.endY);
+	}
+
+	// Draw right cone edge
+	const rightEdge = clipLineToBox(coneX, coneHeightY, 1, -rightSlopePixels, boxMinX, boxMinY, boxMaxX, boxMaxY);
+	if (rightEdge) {
+		stroke(...color);
+		strokeWeight(2);
+		line(rightEdge.startX, rightEdge.startY, rightEdge.endX, rightEdge.endY);
+	}
+
+	// Apex point
+	fill(...color);
+	noStroke();
+	circle(coneX, coneHeightY, 6);
+}
+
 
 // Draw the last stepped state with low opacity (shown when paused)
 export function drawLastSteppingState(viewWidth, viewHeight) {
@@ -82,52 +133,58 @@ export function drawLastSteppingState(viewWidth, viewHeight) {
 
 	const stepPoints = state.lastSteppingData.stepPoints;
 
-	// Draw all step points with low opacity
+	// Draw ALL step points with low opacity
 	for (let i = 0; i < stepPoints.length; i++) {
 		const pt = stepPoints[i];
 		// Only draw if within bounds
 		if (pt.x >= boxMinX && pt.x <= boxMaxX && pt.y >= boxMinY && pt.y <= boxMaxY) {
-			const isCurrent = i === stepPoints.length - 1;
-			const stepColor = isCurrent ? [200, 100, 200] : [150, 150, 255];
+			const stepColor = [150, 150, 255]; // Blue for all points
 			fill(...stepColor, opacity);
 			noStroke();
-			circle(pt.x, pt.y, 8);
+			circle(pt.x, pt.y, 6);
 		}
 	}
 
-	// Draw the cone at the last position with low opacity
-	if (stepPoints.length > 1 && state.lastSteppingData.currentConeIndex >= 0 && state.lastSteppingData.currentConeIndex < state.coneMap.length) {
-		const closestIndex = state.lastSteppingData.currentConeIndex;
-		const cone = state.coneMap[closestIndex];
-		if (!cone || closestIndex >= state.heightmap.length) return; // Safety check
-
-		const coneX = params.sideViewPadding + closestIndex * pointSpacing;
-		const coneHeightY = params.sideViewPadding + viewHeight_canvas - state.heightmap[closestIndex] * scaleFactor * viewHeight_canvas;
-
-		const effectiveViewHeight = viewHeight_canvas * scaleFactor;
-		const leftSlopePixels = Math.tan(cone.leftAngle) * (effectiveViewHeight / pointSpacing);
-		const rightSlopePixels = Math.tan(cone.rightAngle) * (effectiveViewHeight / pointSpacing);
-
-		// Draw left cone edge with low opacity
-		const leftEdge = clipLineToBox(coneX, coneHeightY, -1, -leftSlopePixels, boxMinX, boxMinY, boxMaxX, boxMaxY);
-		if (leftEdge) {
-			stroke(200, 100, 200, opacity);
-			strokeWeight(2);
-			line(leftEdge.startX, leftEdge.startY, leftEdge.endX, leftEdge.endY);
+	// Draw t_save point (last known safe position) in green with opacity
+	if (state.lastSteppingData.t_save_point) {
+		const pt = state.lastSteppingData.t_save_point;
+		if (pt.x >= boxMinX && pt.x <= boxMaxX && pt.y >= boxMinY && pt.y <= boxMaxY) {
+			fill(100, 255, 100, opacity);
+			noStroke();
+			circle(pt.x, pt.y, 10);
 		}
+	}
 
-		// Draw right cone edge with low opacity
-		const rightEdge = clipLineToBox(coneX, coneHeightY, 1, -rightSlopePixels, boxMinX, boxMinY, boxMaxX, boxMaxY);
-		if (rightEdge) {
-			stroke(200, 100, 200, opacity);
-			strokeWeight(2);
-			line(rightEdge.startX, rightEdge.startY, rightEdge.endX, rightEdge.endY);
+	// Draw t_fail point (first failure position) in red with opacity
+	if (state.lastSteppingData.t_fail_point) {
+		const pt = state.lastSteppingData.t_fail_point;
+		if (pt.x >= boxMinX && pt.x <= boxMaxX && pt.y >= boxMinY && pt.y <= boxMaxY) {
+			fill(255, 100, 100, opacity);
+			noStroke();
+			circle(pt.x, pt.y, 10);
 		}
+	}
 
-		// Apex point
-		fill(200, 100, 200, opacity);
-		noStroke();
-		circle(coneX, coneHeightY, 6);
+	// Draw cone at t_save (green with reduced opacity)
+	if (state.lastSteppingData.t_save_point && state.lastSteppingData.t_save_point.coneIndex !== undefined) {
+		const coneIndex = state.lastSteppingData.t_save_point.coneIndex;
+		if (coneIndex >= 0 && coneIndex < state.coneMap.length) {
+			const cone = state.coneMap[coneIndex];
+			if (cone && coneIndex < state.heightmap.length) {
+				drawConeAt(coneIndex, cone, pointSpacing, viewHeight_canvas, scaleFactor, [100, 255, 100, 50], boxMinX, boxMinY, boxMaxX, boxMaxY);
+			}
+		}
+	}
+
+	// Draw cone at t_fail (red with reduced opacity)
+	if (state.lastSteppingData.t_fail_point && state.lastSteppingData.t_fail_point.coneIndex !== undefined) {
+		const coneIndex = state.lastSteppingData.t_fail_point.coneIndex;
+		if (coneIndex >= 0 && coneIndex < state.coneMap.length) {
+			const cone = state.coneMap[coneIndex];
+			if (cone && coneIndex < state.heightmap.length) {
+				drawConeAt(coneIndex, cone, pointSpacing, viewHeight_canvas, scaleFactor, [255, 100, 100, 50], boxMinX, boxMinY, boxMaxX, boxMaxY);
+			}
+		}
 	}
 
 	// Draw the old ray with low opacity
