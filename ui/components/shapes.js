@@ -4,9 +4,53 @@ import { coneMap, state } from '../../state.js';
 export function drawHoveredCone(pointSpacing, viewHeight, viewWidth) {
 	if (state.hoveredIndex < 0 || state.hoveredIndex >= coneMap.length) return;
 
-	const cone = coneMap[state.hoveredIndex];
-	const { x, y } = cone.getScreenPosition(pointSpacing, viewHeight, params.sideViewPadding);
-	const { pixelLeftSlope, pixelRightSlope } = cone.getScreenSlopes(pointSpacing, viewHeight);
+	let x, y, pixelLeftSlope, pixelRightSlope;
+
+	if (state.uiState.heightmapInterpolated && state.hoveredX >= 0) {
+		// Interpolate cone at exact hovered position
+		const scaleFactor = params.heightmapScale / 100;
+		const localX = state.hoveredX - params.sideViewPadding;
+		const floatIndex = localX / pointSpacing;
+		const maxIndex = state.heightmap.length - 1;
+		
+		if (floatIndex >= 0 && floatIndex <= maxIndex) {
+			const idx0 = Math.floor(floatIndex);
+			const idx1 = Math.min(idx0 + 1, maxIndex);
+			const frac = floatIndex - idx0;
+			
+			// Interpolate height
+			const h0 = state.heightmap[idx0];
+			const h1 = state.heightmap[idx1];
+			const h = h0 * (1 - frac) + h1 * frac;
+			
+			x = state.hoveredX;
+			y = params.sideViewPadding + viewHeight - h * scaleFactor * viewHeight;
+			
+			// Interpolate slopes
+			const leftSlope0 = coneMap[idx0].leftSlope;
+			const leftSlope1 = coneMap[idx1].leftSlope;
+			const leftSlope = leftSlope0 * (1 - frac) + leftSlope1 * frac;
+			
+			const rightSlope0 = coneMap[idx0].rightSlope;
+			const rightSlope1 = coneMap[idx1].rightSlope;
+			const rightSlope = rightSlope0 * (1 - frac) + rightSlope1 * frac;
+			
+			pixelLeftSlope = leftSlope * scaleFactor * viewHeight / pointSpacing;
+			pixelRightSlope = rightSlope * scaleFactor * viewHeight / pointSpacing;
+		} else {
+			return; // Out of bounds
+		}
+	} else {
+		// Use nearest cone
+		const cone = coneMap[state.hoveredIndex];
+		const pos = cone.getScreenPosition(pointSpacing, viewHeight, params.sideViewPadding);
+		x = pos.x;
+		y = pos.y;
+		
+		const slopes = cone.getScreenSlopes(pointSpacing, viewHeight);
+		pixelLeftSlope = slopes.pixelLeftSlope;
+		pixelRightSlope = slopes.pixelRightSlope;
+	}
 
 	// Visualization box bounds
 	const boxMinX = params.sideViewPadding;

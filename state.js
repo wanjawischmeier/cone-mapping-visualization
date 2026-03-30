@@ -41,6 +41,7 @@ export const state = {
 	heightmap: [],
 	coneMap: [],
 	hoveredIndex: -1,
+	hoveredX: -1, // Actual x coordinate of hovered position (used for interpolation)
 	ray: new Ray(150, 100, 300, 400),
 	draggingRayPoint: -1, // -1 = not dragging, 0 = point1, 1 = point2
 	uiState: new UIState(),

@@ -56,9 +56,51 @@ export function drawHeightmapVisualization() {
 
 		// Only show next step point if ray is also visible
 		if (state.uiState.showRay) {
-			const cone = state.coneMap[state.hoveredIndex];
-			const { x: coneX, y: coneY } = cone.getScreenPosition(pointSpacing, viewHeight, params.sideViewPadding);
-			const { pixelLeftSlope, pixelRightSlope } = cone.getScreenSlopes(pointSpacing, viewHeight);
+			let coneX, coneY, pixelLeftSlope, pixelRightSlope;
+			
+			if (state.uiState.heightmapInterpolated) {
+				// Interpolate cone at exact hovered position
+				const scaleFactor = params.heightmapScale / 100;
+				const localX = state.hoveredX;
+				const floatIndex = (localX - params.sideViewPadding) / pointSpacing;
+				const maxIndex = state.heightmap.length - 1;
+				
+				if (floatIndex >= 0 && floatIndex <= maxIndex) {
+					const idx0 = Math.floor(floatIndex);
+					const idx1 = Math.min(idx0 + 1, maxIndex);
+					const frac = floatIndex - idx0;
+					
+					// Interpolate height
+					const h0 = state.heightmap[idx0];
+					const h1 = state.heightmap[idx1];
+					const h = h0 * (1 - frac) + h1 * frac;
+					
+					coneX = state.hoveredX;
+					coneY = params.sideViewPadding + viewHeight - h * scaleFactor * viewHeight;
+					
+					// Interpolate slopes
+					const leftSlope0 = state.coneMap[idx0].leftSlope;
+					const leftSlope1 = state.coneMap[idx1].leftSlope;
+					const leftSlope = leftSlope0 * (1 - frac) + leftSlope1 * frac;
+					
+					const rightSlope0 = state.coneMap[idx0].rightSlope;
+					const rightSlope1 = state.coneMap[idx1].rightSlope;
+					const rightSlope = rightSlope0 * (1 - frac) + rightSlope1 * frac;
+					
+					pixelLeftSlope = leftSlope * scaleFactor * viewHeight / pointSpacing;
+					pixelRightSlope = rightSlope * scaleFactor * viewHeight / pointSpacing;
+				}
+			} else {
+				// Use nearest cone
+				const cone = state.coneMap[state.hoveredIndex];
+				const pos = cone.getScreenPosition(pointSpacing, viewHeight, params.sideViewPadding);
+				coneX = pos.x;
+				coneY = pos.y;
+				
+				const slopes = cone.getScreenSlopes(pointSpacing, viewHeight);
+				pixelLeftSlope = slopes.pixelLeftSlope;
+				pixelRightSlope = slopes.pixelRightSlope;
+			}
 			
 			// Create ray and compute next step point
 			const ray = new Ray(state.ray.x1, state.ray.y1, state.ray.x2, state.ray.y2);
@@ -79,6 +121,7 @@ export function drawHeightmapVisualization() {
 		const maxX = params.sideViewPadding + viewWidth;
 
 		state.hoveredIndex = -1;
+		state.hoveredX = -1;
 		let closestDist = Infinity;
 
 		for (let i = 0; i < state.heightmap.length; i++) {
@@ -88,6 +131,7 @@ export function drawHeightmapVisualization() {
 			if (dist < closestDist && adjustedMouseX >= minX && adjustedMouseX <= maxX) {
 				closestDist = dist;
 				state.hoveredIndex = i;
+				state.hoveredX = adjustedMouseX; // Store actual hovered x position
 			}
 		}
 	}
