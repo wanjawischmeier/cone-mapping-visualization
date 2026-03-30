@@ -2,36 +2,38 @@ import { params } from './config.js';
 import { state } from './state.js';
 
 export class Cone {
-	// Store left and right angles separately to support both isotropic and anisotropic cones
-	constructor(height, leftAngle, rightAngle, radius, index) {
+	constructor(height, leftSlope, rightSlope, index) {
 		this.height = height;
-		this.leftAngle = leftAngle;    // Angle for left edge of cone
-		this.rightAngle = rightAngle;  // Angle for right edge of cone
-		this.radius = radius;
+		this.leftSlope = leftSlope;    // Slope for left edge of cone
+		this.rightSlope = rightSlope;  // Slope for right edge of cone
 		this.index = index;
 	}
 
-	// Create isotropic cone (same angle on both sides)
+	// Create isotropic cone (same slope on both sides)
 	static isotropic(height, maxSlope, index) {
-		const radius = maxSlope > 0 ? 1.0 / maxSlope : 1.0;
-		const angle = Math.atan(maxSlope);
-		return new Cone(height, angle, angle, radius, index);
+		return new Cone(height, maxSlope, maxSlope, index);
 	}
 
-	// Create anisotropic cone (different angles on each side)
+	// Create anisotropic cone (different slopes on each side)
 	static anisotropic(height, leftSlope, rightSlope, index) {
-		const leftAngle = Math.atan(leftSlope);
-		const rightAngle = Math.atan(rightSlope);
-		const maxSlope = Math.max(leftSlope, rightSlope);
-		const radius = maxSlope > 0 ? 1.0 / maxSlope : 1.0;
-		return new Cone(height, leftAngle, rightAngle, radius, index);
+		return new Cone(height, leftSlope, rightSlope, index);
 	}
 
-	// Get screen position for this cone in the visualization
+	// Get screen position for cone apex in the visualization
 	getScreenPosition(pointSpacing, viewHeight, sideViewPadding) {
 		const x = sideViewPadding + this.index * pointSpacing;
 		const y = sideViewPadding + viewHeight - this.height * (params.heightmapScale / 100) * viewHeight;
 		return { x, y };
+	}
+
+	// Get pixel-space slopes for the visual representation
+	// This represents the actual dh/dx slope on the canvas
+	getScreenSlopes(pointSpacing, viewHeight) {
+		const scaleFactor = params.heightmapScale / 100;
+		return {
+			pixelLeftSlope: this.leftSlope * scaleFactor * viewHeight / pointSpacing,
+			pixelRightSlope: this.rightSlope * scaleFactor * viewHeight / pointSpacing
+		};
 	}
 }
 

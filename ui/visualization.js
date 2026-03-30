@@ -1,9 +1,10 @@
 import { params } from '../config.js';
 import { state } from '../state.js';
+import { Ray } from '../ray.js';
 import { drawHeightmapProfile, drawHeightmapPoints } from './components/heightmap.js';
 import { drawIterationSlider } from './components/iterationSlider.js';
 import { drawConeStepping, drawLastSteppingState } from './components/coneStepping.js';
-import { drawHoveredCone, drawRayIntersections, drawRay, clipLineToBox } from './components/shapes.js';
+import { drawHoveredCone, drawNextStepPoint, drawRay, clipLineToBox } from './components/shapes.js';
 
 export function drawHeightmapVisualization() {
 	if (state.heightmap.length === 0) {
@@ -53,12 +54,19 @@ export function drawHeightmapVisualization() {
 	if (state.coneMap.length > 0 && state.hoveredIndex >= 0 && state.uiState.showHoveredCone) {
 		drawHoveredCone(pointSpacing, viewHeight, viewWidth);
 
-		// Only show intersections if ray is also visible
+		// Only show next step point if ray is also visible
 		if (state.uiState.showRay) {
-			state.rayIntersections.length = 0;
-			const intersections = state.ray.getIntersectionsWithCone(state.coneMap[state.hoveredIndex], pointSpacing, viewHeight, params.sideViewPadding);
-			state.rayIntersections.push(...intersections);
-			drawRayIntersections(viewWidth, viewHeight);
+			const cone = state.coneMap[state.hoveredIndex];
+			const { x: coneX, y: coneY } = cone.getScreenPosition(pointSpacing, viewHeight, params.sideViewPadding);
+			const { pixelLeftSlope, pixelRightSlope } = cone.getScreenSlopes(pointSpacing, viewHeight);
+			
+			// Create ray and compute next step point
+			const ray = new Ray(state.ray.x1, state.ray.y1, state.ray.x2, state.ray.y2);
+			const nextStepPoint = ray.computeRayStep(coneX, coneY, pixelLeftSlope, pixelRightSlope, viewHeight);
+			
+			if (nextStepPoint) {
+				drawNextStepPoint(nextStepPoint);
+			}
 		}
 	}
 

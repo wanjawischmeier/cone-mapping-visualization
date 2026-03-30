@@ -36,7 +36,6 @@ export const state = {
 	hoveredIndex: -1,
 	ray: new Ray(150, 100, 300, 400),
 	draggingRayPoint: -1, // -1 = not dragging, 0 = point1, 1 = point2
-	rayIntersections: [], // Array of intersection objects
 	uiState: new UIState(),
 	prevMousePressed: false, // Track previous frame's mouse state for click detection
 	currentIteration: 9, // Start at maximum (params.rayIterations - 1, with default rayIterations = 10)
@@ -55,7 +54,6 @@ export const coneMap = state.coneMap;
 export const hoveredIndex = state.hoveredIndex;
 export const ray = state.ray;
 export const draggingRayPoint = state.draggingRayPoint;
-export const rayIntersections = state.rayIntersections;
 export const uiState = state.uiState;
 export const prevMousePressed = state.prevMousePressed;
 export const currentIteration = state.currentIteration;

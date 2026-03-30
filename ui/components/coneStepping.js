@@ -86,15 +86,11 @@ export function drawConeStepping(viewWidth, viewHeight) {
 
 // Helper function to draw a cone at a specific index
 function drawConeAt(coneIndex, cone, pointSpacing, viewHeight_canvas, scaleFactor, color, boxMinX, boxMinY, boxMaxX, boxMaxY) {
-	const coneX = params.sideViewPadding + coneIndex * pointSpacing;
-	const coneHeightY = params.sideViewPadding + viewHeight_canvas - state.heightmap[coneIndex] * scaleFactor * viewHeight_canvas;
-
-	const effectiveViewHeight = viewHeight_canvas * scaleFactor;
-	const leftSlopePixels = Math.tan(cone.leftAngle) * (effectiveViewHeight / pointSpacing);
-	const rightSlopePixels = Math.tan(cone.rightAngle) * (effectiveViewHeight / pointSpacing);
+	const { x: coneX, y: coneHeightY } = cone.getScreenPosition(pointSpacing, viewHeight_canvas, params.sideViewPadding);
+	const { pixelLeftSlope, pixelRightSlope } = cone.getScreenSlopes(pointSpacing, viewHeight_canvas);
 
 	// Draw left cone edge
-	const leftEdge = clipLineToBox(coneX, coneHeightY, -1, -leftSlopePixels, boxMinX, boxMinY, boxMaxX, boxMaxY);
+	const leftEdge = clipLineToBox(coneX, coneHeightY, -1, -pixelLeftSlope, boxMinX, boxMinY, boxMaxX, boxMaxY);
 	if (leftEdge) {
 		stroke(...color);
 		strokeWeight(2);
@@ -102,7 +98,7 @@ function drawConeAt(coneIndex, cone, pointSpacing, viewHeight_canvas, scaleFacto
 	}
 
 	// Draw right cone edge
-	const rightEdge = clipLineToBox(coneX, coneHeightY, 1, -rightSlopePixels, boxMinX, boxMinY, boxMaxX, boxMaxY);
+	const rightEdge = clipLineToBox(coneX, coneHeightY, 1, -pixelRightSlope, boxMinX, boxMinY, boxMaxX, boxMaxY);
 	if (rightEdge) {
 		stroke(...color);
 		strokeWeight(2);

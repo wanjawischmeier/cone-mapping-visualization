@@ -2,7 +2,7 @@ import { params } from './config.js';
 import { state } from './state.js';
 import { Ray } from './ray.js';
 
-// Performs cone stepping along the ray and returns step data
+// Perform cone stepping along the ray and returns step data
 export function performConeStepping() {
     // Only run if stepping is enabled
     if (!shouldPerformStepping()) {
@@ -75,37 +75,38 @@ function performSteppingWithTermination(rayX1, rayY1, pointSpacing, viewHeight_c
     let t_fail_point = null;
     let has_hit = false;
 
-    const rayDx = state.ray.x2 - state.ray.x1;
-    const rayDy = state.ray.y2 - state.ray.y1;
-    const rayLen = Math.sqrt(rayDx * rayDx + rayDy * rayDy);
-    const rayUx = rayLen > 0 ? rayDx / rayLen : 0;
-    const rayUy = rayLen > 0 ? rayDy / rayLen : 0;
-
     for (let step = 0; step < params.rayIterations; step++) {
-        // 1. Find cone & compute step
+        // 1. Find cone at current position
         const closestIndex = findClosestHeightmapIndex(currentX, pointSpacing);
         const cone = state.coneMap[closestIndex];
-        const intersection = calculateIntersectionAlongRay(currentX, currentY, cone, pointSpacing, viewHeight_canvas);
+        const { x: coneX, y: coneY } = cone.getScreenPosition(pointSpacing, viewHeight_canvas, params.sideViewPadding);
+
+        // Create ray starting from current position
+        const ray = new Ray(currentX, currentY, state.ray.x2, state.ray.y2);
+        
+        // 2. Compute safe step using algebraic ray-plane intersection
+        const { pixelLeftSlope, pixelRightSlope } = cone.getScreenSlopes(pointSpacing, viewHeight_canvas);
+        const intersection = ray.computeRayStep(coneX, coneY, pixelLeftSlope, pixelRightSlope, viewHeight_canvas);
         
         if (!intersection) {
             // Cone step failed → MISS (not a surface hit)
             break;
         }
 
-        // 2. COMPUTE RAY HEIGHT at new position
+        // 3. COMPUTE RAY HEIGHT at new position
         const newX = intersection.x;
         const newY = intersection.y;
         const closestHeightIndex = findClosestHeightmapIndex(newX, pointSpacing);
         const surfaceHeightNormalized = state.heightmap[closestHeightIndex];
         const surfaceHeightCanvas = params.sideViewPadding + viewHeight_canvas - surfaceHeightNormalized * scaleFactor * viewHeight_canvas;
 
-        // 3. LINEAR interpolation along the ray to find its Y at newX
+        // 4. LINEAR interpolation along the ray to find its Y at newX
         const rayXRange = state.ray.x2 - state.ray.x1;
         const rayYRange = state.ray.y2 - state.ray.y1;
         const fraction = rayXRange !== 0 ? (newX - state.ray.x1) / rayXRange : 0;
         const rayHeightAtNewX = state.ray.y1 + fraction * rayYRange;
 
-        // 4. HEIGHT TEST - THIS IS YOUR STOP CONDITION
+        // 5. HEIGHT TEST - THIS IS YOUR STOP CONDITION
         if (rayHeightAtNewX >= surfaceHeightCanvas) {
             // FIRST FAILURE → perfect bracket!
             if (!has_hit) {
@@ -115,7 +116,7 @@ function performSteppingWithTermination(rayX1, rayY1, pointSpacing, viewHeight_c
             break; // Stop coarse stepping
         }
         
-        // 5. SUCCESSFUL STEP - update safe position
+        // 6. SUCCESSFUL STEP - update safe position
         t_save_point = { x: newX, y: newY, coneIndex: closestHeightIndex };
         currentX = newX;
         currentY = newY;
@@ -129,42 +130,4 @@ function performSteppingWithTermination(rayX1, rayY1, pointSpacing, viewHeight_c
         t_fail_point,
         has_hit
     };
-}
-
-// Calculate ray-cone intersection point
-function calculateIntersectionAlongRay(currentX, currentY, cone, pointSpacing, viewHeight_canvas) {
-    // Get ray direction
-    const rayDx = state.ray.x2 - state.ray.x1;
-    const rayDy = state.ray.y2 - state.ray.y1;
-    const rayLen = Math.sqrt(rayDx * rayDx + rayDy * rayDy);
-    const rayUx = rayLen > 0 ? rayDx / rayLen : 0;
-    const rayUy = rayLen > 0 ? rayDy / rayLen : 0;
-
-    // Create an artificial end point far away along the ray direction
-    const infiniteRayX2 = currentX + rayUx * 10000;
-    const infiniteRayY2 = currentY + rayUy * 10000;
-
-    const stepRay = new Ray(currentX, currentY, infiniteRayX2, infiniteRayY2);
-    const intersections = stepRay.getIntersectionsWithCone(cone, pointSpacing, viewHeight_canvas, params.sideViewPadding);
-
-    // Find the closest intersection point ahead on the ray in the ray direction
-    let closestIntersection = null;
-    let minDot = Infinity;
-
-    for (let intersection of intersections) {
-        const dx = intersection.x - currentX;
-        const dy = intersection.y - currentY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist > 0.1) { // Avoid stepping to same point
-            // Check if intersection is in ray direction
-            const dotProduct = (dx * rayUx + dy * rayUy);
-            if (dotProduct > 0.1 && dotProduct < minDot) { // Must be forward and closest in ray direction
-                minDot = dotProduct;
-                closestIntersection = intersection;
-            }
-        }
-    }
-
-    return closestIntersection;
 }

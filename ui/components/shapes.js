@@ -6,14 +6,7 @@ export function drawHoveredCone(pointSpacing, viewHeight, viewWidth) {
 
 	const cone = coneMap[state.hoveredIndex];
 	const { x, y } = cone.getScreenPosition(pointSpacing, viewHeight, params.sideViewPadding);
-
-	// Account for the height scale when computing pixel slopes
-	const scaleFactor = params.heightmapScale / 100;
-	const effectiveViewHeight = viewHeight * scaleFactor;
-
-	// Calculate pixel slopes for left and right edges (may be different for anisotropic cones)
-	const leftSlopePixels = Math.tan(cone.leftAngle) * (effectiveViewHeight / pointSpacing);
-	const rightSlopePixels = Math.tan(cone.rightAngle) * (effectiveViewHeight / pointSpacing);
+	const { pixelLeftSlope, pixelRightSlope } = cone.getScreenSlopes(pointSpacing, viewHeight);
 
 	// Visualization box bounds
 	const boxMinX = params.sideViewPadding;
@@ -22,7 +15,7 @@ export function drawHoveredCone(pointSpacing, viewHeight, viewWidth) {
 	const boxMaxY = params.sideViewPadding + viewHeight;
 
 	// Left cone edge: passes through apex with direction (-1, -leftSlopePixels)
-	const leftEdge = clipLineToBox(x, y, -1, -leftSlopePixels, boxMinX, boxMinY, boxMaxX, boxMaxY);
+	const leftEdge = clipLineToBox(x, y, -1, -pixelLeftSlope, boxMinX, boxMinY, boxMaxX, boxMaxY);
 	if (leftEdge) {
 		stroke(255, 100, 100);
 		strokeWeight(2);
@@ -30,7 +23,7 @@ export function drawHoveredCone(pointSpacing, viewHeight, viewWidth) {
 	}
 
 	// Right cone edge: passes through apex with direction (1, -rightSlopePixels)
-	const rightEdge = clipLineToBox(x, y, 1, -rightSlopePixels, boxMinX, boxMinY, boxMaxX, boxMaxY);
+	const rightEdge = clipLineToBox(x, y, 1, -pixelRightSlope, boxMinX, boxMinY, boxMaxX, boxMaxY);
 	if (rightEdge) {
 		stroke(255, 100, 100);
 		strokeWeight(2);
@@ -68,24 +61,16 @@ export function drawRay(boxMinX, boxMinY, boxWidth, boxHeight) {
 }
 
 export function drawRayIntersections(viewWidth, viewHeight) {
-	if (state.rayIntersections.length === 0) return;
+	// This function has been removed - use drawNextStepPoint instead
+}
 
-	// Define clipping bounds
-	const boxMinX = params.sideViewPadding;
-	const boxMinY = params.sideViewPadding;
-	const boxMaxX = params.sideViewPadding + viewWidth;
-	const boxMaxY = params.sideViewPadding + viewHeight;
+export function drawNextStepPoint(stepPoint) {
+	if (!stepPoint) return;
 
-	fill(0, 255, 0);
+	// Draw the next step point that the ray would step to
+	fill(0, 255, 100);  // Green
 	noStroke();
-
-	for (let intersection of state.rayIntersections) {
-		// Only draw if within bounds
-		if (intersection.x >= boxMinX && intersection.x <= boxMaxX &&
-			intersection.y >= boxMinY && intersection.y <= boxMaxY) {
-			circle(intersection.x, intersection.y, 10);
-		}
-	}
+	circle(stepPoint.x, stepPoint.y, 10);
 }
 
 // Helper: Clip a line defined by point and direction to a box
