@@ -5,6 +5,7 @@ export class UIState {
 		this.showRay = true;
 		this.showConeStepping = true;
 		this.showHoveredCone = false;
+		this.heightmapInterpolated = true; // true = smooth interpolated, false = nearest neighbor (stepped)
 	}
 
 	// Toggle ray visibility
@@ -22,11 +23,17 @@ export class UIState {
 		this.showHoveredCone = !this.showHoveredCone;
 	}
 
+	// Toggle heightmap visualization mode
+	toggleHeightmapMode() {
+		this.heightmapInterpolated = !this.heightmapInterpolated;
+	}
+
 	// Reset to defaults
 	reset() {
 		this.showRay = true;
 		this.showConeStepping = true;
 		this.showHoveredCone = false;
+		this.heightmapInterpolated = true;
 	}
 }
 

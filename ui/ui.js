@@ -163,6 +163,17 @@ export function drawUIPanel() {
 		state.uiState.toggleHoveredCone();
 		saveState();
 	}
+	currentUIY += 30;
+
+	// Toggle Heightmap interpolation mode
+	if (drawCheckbox("Heightmap Interpolated", state.uiState.heightmapInterpolated, uiPanelX + 10, currentUIY)) {
+		state.uiState.toggleHeightmapMode();
+		// Regenerate cone map if it exists, to apply/remove the bilinear fix
+		if (coneMap.length > 0) {
+			generateConeMap();
+		}
+		saveState();
+	}
 	currentUIY += 50;
 
 	fill(0);

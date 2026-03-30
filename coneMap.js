@@ -92,10 +92,71 @@ export function generateConeMap() {
 
 	console.log(`Generated ${params.coneMode} cone map`);
 
+	// Apply bilinear fix if interpolated mode is on (robust cone stepping)
+	// Each slope becomes the maximum of itself and its neighbors
+	if (state.uiState.heightmapInterpolated) {
+		applyBilinearFix();
+	}
+
 	// Clear stepping data when new cone map is generated
 	state.steppingData = { stepPoints: [], currentConeIndex: -1, pointSpacing: 0, t_save_point: null, t_fail_point: null, has_hit: false };
 	state.lastSteppingData = { stepPoints: [], currentConeIndex: -1, pointSpacing: 0, t_save_point: null, t_fail_point: null, has_hit: false };
 
 	// Enable cone stepping when cone map is generated
 	state.steppingRunning = true;
+}
+
+// Apply bilinear fix from robust cone stepping paper
+// Each slope becomes the steepest (maximum value) of itself and its 2 immediate neighbors
+// Must capture original slopes first to avoid propagating values across the map
+function applyBilinearFix() {
+	const n = state.coneMap.length;
+	if (n < 2) return; // No neighbors to check
+
+	// Save original slopes before modifying
+	const originalLeft = state.coneMap.map(cone => cone.leftSlope);
+	const originalRight = state.coneMap.map(cone => cone.rightSlope);
+
+	if (params.coneMode === 'isotropic') {
+		// For isotropic mode, update each cone's slope based on original values
+		for (let i = 0; i < n; i++) {
+			let maxSlope = originalLeft[i]; // Start with current slope
+			
+			// Check left neighbor's original slope
+			if (i > 0) {
+				maxSlope = Math.max(maxSlope, originalLeft[i - 1]);
+			}
+			
+			// Check right neighbor's original slope
+			if (i < n - 1) {
+				maxSlope = Math.max(maxSlope, originalLeft[i + 1]);
+			}
+			
+			// Update both left and right slopes (same in isotropic mode)
+			state.coneMap[i].leftSlope = maxSlope;
+			state.coneMap[i].rightSlope = maxSlope;
+		}
+	} else if (params.coneMode === 'anisotropic') {
+		// For anisotropic mode, update left and right slopes independently based on original values
+		for (let i = 0; i < n; i++) {
+			let maxLeftSlope = originalLeft[i];
+			let maxRightSlope = originalRight[i];
+			
+			// Check left neighbor's original slopes
+			if (i > 0) {
+				maxLeftSlope = Math.max(maxLeftSlope, originalLeft[i - 1]);
+				maxRightSlope = Math.max(maxRightSlope, originalRight[i - 1]);
+			}
+			
+			// Check right neighbor's original slopes
+			if (i < n - 1) {
+				maxLeftSlope = Math.max(maxLeftSlope, originalLeft[i + 1]);
+				maxRightSlope = Math.max(maxRightSlope, originalRight[i + 1]);
+			}
+			
+			// Update slopes
+			state.coneMap[i].leftSlope = maxLeftSlope;
+			state.coneMap[i].rightSlope = maxRightSlope;
+		}
+	}
 }

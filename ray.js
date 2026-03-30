@@ -81,48 +81,53 @@ export class Ray {
 		const mathDx = rayUx;
 		const mathDz = -rayUy; // math mathRayY goes up, p5 y goes down
 
-		// Check if inside cone (must be above apex)
-		if (mathPz0 <= 0) return null;
-		
-		// To be inside the cone, the point's height (mathPz0) must be greater than or equal to 
-		// the height of the cone boundary at that x position.
-		if (mathPx0 > 0) { // To the right of apex
-			if (mathPz0 < pixelRightSlope * mathPx0) return null;
-		} else { // To the left of apex
-			if (mathPz0 < pixelLeftSlope * -mathPx0) return null;
+		// Are we inside the solid bounds of the cone?
+		// We use a small epsilon to tolerate floating point errors on the safe boundary
+		let insideSolid = false;
+		if (mathPz0 <= 0) {
+			insideSolid = true;
+		} else if (mathPx0 > 0) {
+			if (mathPz0 < pixelRightSlope * mathPx0 - 1e-3) insideSolid = true;
+		} else {
+			if (mathPz0 < pixelLeftSlope * -mathPx0 - 1e-3) insideSolid = true;
 		}
 
-		let ts = [];
+		if (insideSolid) {
+			// Ray origin is inside the bounding solid.
+			// Return t=0 to allow epsilon pushing to break us out of the local overlap.
+			return { x: this.x1, y: this.y1, t: 0 };
+		}
+
+		let validTs = [];
 		
 		// Right plane (x > 0): z = pixelRightSlope * x
-		// mathPz0 + t*mathDz = pixelRightSlope * (mathPx0 + t*mathDx)
-		// t * (mathDz - pixelRightSlope * mathDx) = pixelRightSlope * mathPx0 - mathPz0
+		// At t, x(t) = mathPx0 + t*mathDx
+		// Intersect when: mathPz0 + t*mathDz = pixelRightSlope * (mathPx0 + t*mathDx)
 		const denomR = mathDz - pixelRightSlope * mathDx;
 		if (Math.abs(denomR) > 1e-6) {
-			const tR = (pixelRightSlope * mathPx0 - mathPz0) / denomR;
+			const tR = -(mathPz0 - pixelRightSlope * mathPx0) / denomR;
 			if (tR > 1e-6) {
-				// Check if intersection is actually on the right side of apex
 				const ix = mathPx0 + tR * mathDx;
-				if (ix >= -1e-6) ts.push(tR);
+				// Need to hit the actual positive-x side of the cone
+				if (ix >= -1e-6) validTs.push(tR);
 			}
 		}
 
 		// Left plane (x < 0): z = pixelLeftSlope * (-x)
-		// mathPz0 + t*mathDz = -pixelLeftSlope * (mathPx0 + t*mathDx)
-		// t * (mathDz + pixelLeftSlope * mathDx) = -pixelLeftSlope * mathPx0 - mathPz0
+		// Intersect when: mathPz0 + t*mathDz = -pixelLeftSlope * (mathPx0 + t*mathDx)
 		const denomL = mathDz + pixelLeftSlope * mathDx;
 		if (Math.abs(denomL) > 1e-6) {
-			const tL = (-pixelLeftSlope * mathPx0 - mathPz0) / denomL;
+			const tL = -(mathPz0 + pixelLeftSlope * mathPx0) / denomL;
 			if (tL > 1e-6) {
-				// Check if intersection is actually on the left side of apex
 				const ix = mathPx0 + tL * mathDx;
-				if (ix <= 1e-6) ts.push(tL);
+				// Need to hit the actual negative-x side of the cone
+				if (ix <= 1e-6) validTs.push(tL);
 			}
 		}
 
-		if (ts.length === 0) return null;
+		if (validTs.length === 0) return null;
 
-		const t = Math.min(...ts);
+		const t = Math.min(...validTs);
 		return {
 			x: this.x1 + t * rayUx,
 			y: this.y1 + t * rayUy,

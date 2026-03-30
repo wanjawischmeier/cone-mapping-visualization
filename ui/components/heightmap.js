@@ -6,13 +6,40 @@ export function drawHeightmapProfile(pointSpacing, viewHeight) {
 	strokeWeight(params.lineWeight);
 	noFill();
 
-	beginShape();
-	for (let i = 0; i < state.heightmap.length; i++) {
-		const x = params.sideViewPadding + i * pointSpacing;
-		const y = params.sideViewPadding + viewHeight - state.heightmap[i] * (params.heightmapScale / 100) * viewHeight;
-		vertex(x, y);
+	if (state.uiState.heightmapInterpolated) {
+		// Smooth interpolated mode
+		beginShape();
+		for (let i = 0; i < state.heightmap.length; i++) {
+			const x = params.sideViewPadding + i * pointSpacing;
+			const y = params.sideViewPadding + viewHeight - state.heightmap[i] * (params.heightmapScale / 100) * viewHeight;
+			vertex(x, y);
+		}
+		endShape();
+	} else {
+		// Nearest neighbor (stepped) mode - step at midpoints between samples
+		beginShape();
+		for (let i = 0; i < state.heightmap.length; i++) {
+			const x = params.sideViewPadding + i * pointSpacing;
+			const y = params.sideViewPadding + viewHeight - state.heightmap[i] * (params.heightmapScale / 100) * viewHeight;
+			
+			if (i === 0) {
+				vertex(x, y);
+			} else {
+				// Midpoint x between previous and current samples
+				const prevX = params.sideViewPadding + (i - 1) * pointSpacing;
+				const midX = (prevX + x) / 2;
+				const prevY = params.sideViewPadding + viewHeight - state.heightmap[i - 1] * (params.heightmapScale / 100) * viewHeight;
+				
+				// Horizontal line to midpoint at previous height
+				vertex(midX, prevY);
+				// Vertical line to current height at midpoint
+				vertex(midX, y);
+				// Continue to next sample at current height
+				vertex(x, y);
+			}
+		}
+		endShape();
 	}
-	endShape();
 
 	// Draw profile points
 	fill(0);

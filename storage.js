@@ -20,6 +20,7 @@ export function saveState() {
         showRay: state.uiState.showRay,
         showConeStepping: state.uiState.showConeStepping,
         showHoveredCone: state.uiState.showHoveredCone,
+        heightmapInterpolated: state.uiState.heightmapInterpolated,
         coneMode: params.coneMode,
 
         // Ray position
@@ -55,6 +56,7 @@ export function loadState() {
         if (data.showRay !== undefined) state.uiState.showRay = data.showRay;
         if (data.showConeStepping !== undefined) state.uiState.showConeStepping = data.showConeStepping;
         if (data.showHoveredCone !== undefined) state.uiState.showHoveredCone = data.showHoveredCone;
+        if (data.heightmapInterpolated !== undefined) state.uiState.heightmapInterpolated = data.heightmapInterpolated;
 
         // Load ray position
         if (data.rayX1 !== undefined) state.ray.x1 = data.rayX1;
