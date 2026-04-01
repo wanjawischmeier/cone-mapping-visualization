@@ -28,6 +28,17 @@ export function drawUIPanel() {
 	strokeWeight(1);
 	rect(uiPanelX, uiPanelY, params.uiPanelWidth, params.canvasHeight);
 
+	// Handle mouse wheel scrolling within the panel
+	if (mouseX >= uiPanelX && mouseX <= uiPanelX + params.uiPanelWidth &&
+	    mouseY >= uiPanelY && mouseY <= uiPanelY + params.canvasHeight) {
+		// Mouse wheel scroll (p5.js provides -1 for scroll up, 1 for scroll down)
+		if (typeof window.lastMouseWheel !== 'undefined') {
+			state.uiScrollOffset = Math.max(0, Math.min(state.uiMaxScrollOffset, state.uiScrollOffset + window.lastMouseWheel * 15));
+			window.lastMouseWheel = 0; // Reset after consuming
+		}
+	}
+
+	// Draw title (always visible)
 	fill(0);
 	noStroke();
 	textSize(14);
@@ -35,6 +46,10 @@ export function drawUIPanel() {
 	textStyle(BOLD);
 	text("CONTROLS", uiPanelX + 10, uiPanelY + 15);
 	textStyle(NORMAL);
+
+	// Use push/translate for the scrollable content
+	push();
+	translate(0, -state.uiScrollOffset);
 
 	currentUIY = 50;
 
@@ -142,6 +157,61 @@ export function drawUIPanel() {
 
 	currentUIY += 40;
 
+	// Cone Generation Mode selection
+	textAlign(LEFT);
+	text("Generation:", uiPanelX + 10, currentUIY);
+	currentUIY += 15;
+
+	const genModeButtonWidth = (params.uiPanelWidth - 30) / 2;
+	const isConservative = params.coneGenerationMode === 'conservative';
+
+	// Conservative button
+	fill(isConservative ? 100 : 150);
+	stroke(50);
+	strokeWeight(1);
+	rect(uiPanelX + 10, currentUIY, genModeButtonWidth, 20);
+	fill(255);
+	noStroke();
+	textSize(9);
+	textAlign(CENTER, CENTER);
+	text("Conservative", uiPanelX + 10 + genModeButtonWidth / 2, currentUIY + 10);
+
+	if (isMouseClicked(uiPanelX + 10, currentUIY, genModeButtonWidth, 20)) {
+		params.coneGenerationMode = 'conservative';
+		state.coneMap.length = 0;
+		generateConeMap();
+		saveState();
+	}
+
+	// Exact Relaxed button
+	fill(!isConservative ? 100 : 150);
+	stroke(50);
+	strokeWeight(1);
+	rect(uiPanelX + 20 + genModeButtonWidth, currentUIY, genModeButtonWidth, 20);
+	fill(255);
+	noStroke();
+	textSize(9);
+	textAlign(CENTER, CENTER);
+	text("Exact Relaxed", uiPanelX + 20 + genModeButtonWidth + genModeButtonWidth / 2, currentUIY + 10);
+
+	if (isMouseClicked(uiPanelX + 20 + genModeButtonWidth, currentUIY, genModeButtonWidth, 20)) {
+		params.coneGenerationMode = 'exactRelaxed';
+		state.coneMap.length = 0;
+		generateConeMap();
+		saveState();
+	}
+
+	currentUIY += 40;
+
+	// Toggle Bilinear Fix
+	if (drawCheckbox("Bilinear Fix", params.applyBilinearFix, uiPanelX + 10, currentUIY)) {
+		params.applyBilinearFix = !params.applyBilinearFix;
+		state.coneMap.length = 0;
+		generateConeMap();
+		saveState();
+	}
+	currentUIY += 30;
+
 	// Toggle Ray visibility
 	if (drawCheckbox("Show Ray", state.uiState.showRay, uiPanelX + 10, currentUIY)) {
 		state.uiState.toggleRay();
@@ -231,6 +301,15 @@ export function drawUIPanel() {
 	currentUIY = drawSlider("Noise Power:", params.heightmapNoisePower, 0, 1, uiPanelX + 10, currentUIY, sliderWidth, (val) => {
 		params.heightmapNoisePower = val;
 	}, () => { generateRandomHeightmap(); saveState(); });
+
+	// Store the maximum scroll offset (content height minus visible panel height)
+	// Leave some padding at the bottom for readability
+	const contentHeight = currentUIY + 20; // Final Y position with padding
+	const visibleHeight = params.canvasHeight - 40; // Panel height minus title area
+	state.uiMaxScrollOffset = Math.max(0, contentHeight - visibleHeight);
+
+	// End scrollable section
+	pop();
 }
 
 

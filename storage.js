@@ -16,12 +16,17 @@ export function saveState() {
         heightmapSlopeEnd: params.heightmapSlopeEnd,
         heightmapNoisePower: params.heightmapNoisePower,
 
+        // Heightmap and cone data
+        heightmap: [...state.heightmap],
+
         // UI toggles
         showRay: state.uiState.showRay,
         showConeStepping: state.uiState.showConeStepping,
         showHoveredCone: state.uiState.showHoveredCone,
         heightmapInterpolated: state.uiState.heightmapInterpolated,
         coneMode: params.coneMode,
+        coneGenerationMode: params.coneGenerationMode,
+        applyBilinearFix: params.applyBilinearFix,
 
         // Ray position
         rayX1: state.ray.x1,
@@ -51,6 +56,14 @@ export function loadState() {
         if (data.heightmapSlopeEnd !== undefined) params.heightmapSlopeEnd = data.heightmapSlopeEnd;
         if (data.heightmapNoisePower !== undefined) params.heightmapNoisePower = data.heightmapNoisePower;
         if (data.coneMode !== undefined) params.coneMode = data.coneMode;
+        if (data.coneGenerationMode !== undefined) params.coneGenerationMode = data.coneGenerationMode;
+        if (data.applyBilinearFix !== undefined) params.applyBilinearFix = data.applyBilinearFix;
+
+        // Load heightmap
+        if (data.heightmap !== undefined && Array.isArray(data.heightmap)) {
+            state.heightmap.length = 0;
+            state.heightmap.push(...data.heightmap);
+        }
 
         // Load UI toggles
         if (data.showRay !== undefined) state.uiState.showRay = data.showRay;

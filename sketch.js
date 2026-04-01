@@ -107,7 +107,13 @@ function mouseReleased() {
 }
 
 function mouseWheel(event) {
-	// Mouse wheel to change iteration
+	// Check if mouse is over UI panel for scrolling
+	if (mouseX >= 0 && mouseX <= params.uiPanelWidth) {
+		window.lastMouseWheel = event.delta > 0 ? 1 : -1;
+		return false; // Prevent default scrolling
+	}
+
+	// Mouse wheel to change iteration (over heightmap visualization)
 	const viewHeight = params.canvasHeight - 2 * params.sideViewPadding;
 	const viewWidth = params.canvasWidth - params.uiPanelWidth - 2 * params.sideViewPadding;
 	const adjustedMouseX = mouseX - params.uiPanelWidth;

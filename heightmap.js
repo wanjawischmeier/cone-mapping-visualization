@@ -1,5 +1,6 @@
 import { params } from './config.js';
 import { state } from './state.js';
+import { saveState } from './storage.js';
 
 export function generateRandomHeightmap() {
 	state.heightmap.length = 0; // Clear the array
@@ -17,4 +18,7 @@ export function generateRandomHeightmap() {
 	state.hoveredIndex = -1;
 	state.steppingData = { stepPoints: [], currentConeIndex: -1, pointSpacing: 0, t_save_point: null, t_fail_point: null, has_hit: false }; // Clear current stepping data
 	state.lastSteppingData = { stepPoints: [], currentConeIndex: -1, pointSpacing: 0, t_save_point: null, t_fail_point: null, has_hit: false }; // Clear last stepping data
+	
+	// Save the new heightmap to storage
+	saveState();
 }

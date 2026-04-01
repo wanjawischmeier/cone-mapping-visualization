@@ -17,4 +17,6 @@ export let params = {
 	heightmapSlopeEnd: 0.0,
 	heightmapNoisePower: 0.3,
 	coneMode: 'anisotropic', // 'isotropic' or 'anisotropic'
+	coneGenerationMode: 'conservative', // 'conservative' or 'exactRelaxed'
+	applyBilinearFix: true, // Apply post-process bilinear fix for robust stepping
 };

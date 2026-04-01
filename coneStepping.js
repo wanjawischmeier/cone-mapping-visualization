@@ -144,6 +144,26 @@ export function getHeightAndCone(xPos, pointSpacing, viewHeight_canvas, scaleFac
     }
 }
 
+// Compute distance along the ray to the next cell boundary (for conservative step mapping)
+function computeConservativeMinStepToCellBorder(currentX, rayUx, pointSpacing) {
+    if (Math.abs(rayUx) < 1e-6) return 1e-5; // Vertical ray, small epsilon
+    
+    const localX = currentX - params.sideViewPadding;
+    const floatIndex = localX / pointSpacing;
+    
+    let targetIndex;
+    if (rayUx > 0) {
+        targetIndex = Math.floor(floatIndex + 1e-4) + 1;
+    } else {
+        targetIndex = Math.ceil(floatIndex - 1e-4) - 1;
+    }
+    
+    const targetX = params.sideViewPadding + targetIndex * pointSpacing;
+    const distX = targetX - currentX;
+    
+    return Math.max(0, distX / rayUx) + 1e-5;
+}
+
 // Perform stepping with proper termination at first surface hit
 function performSteppingWithTermination(rayX1, rayY1, pointSpacing, viewHeight_canvas, scaleFactor) {
     const origSurfaceData = getHeightAndCone(rayX1, pointSpacing, viewHeight_canvas, scaleFactor);
@@ -168,25 +188,8 @@ function performSteppingWithTermination(rayX1, rayY1, pointSpacing, viewHeight_c
     }
 
     for (let step = 0; step < params.rayIterations; step++) {
-        // Find which discrete cone we're closest to (for navigation, not algorithm logic)
+        // Find which discrete cone we're closest to (for navigation and cell-max tracing)
         let closestIndex = findClosestHeightmapIndex(currentX, pointSpacing);
-        
-        // If we're not making horizontal progress, move forward slightly along the continuous ray
-        // This replaces the old discrete logic that forced currentX to the next integer cone index
-        const minStepX = 0.5; // Minimum horizontal progress we expect
-        if (step > 0 && Math.abs(currentX - stepPoints[stepPoints.length - 1].x) < minStepX) {
-            const rayDx = state.ray.x2 - state.ray.x1;
-            const rayDy = state.ray.y2 - state.ray.y1;
-            const rayLen = Math.hypot(rayDx, rayDy);
-            if (rayLen > 0) {
-                // Just push the ray slightly forward along its analytical vector to prevent floating-point stiction
-                const epsilonDist = 1.0; 
-                currentX += (rayDx / rayLen) * epsilonDist;
-                currentY += (rayDy / rayLen) * epsilonDist;
-            } else {
-                break;
-            }
-        }
 
         // Get the cone at current position (may be interpolated or discrete)
         const coneData = getHeightAndCone(currentX, pointSpacing, viewHeight_canvas, scaleFactor);
@@ -199,6 +202,11 @@ function performSteppingWithTermination(rayX1, rayY1, pointSpacing, viewHeight_c
         // Global ray direction (constant)
         const globalRayDx = state.ray.x2 - state.ray.x1;
         const globalRayDy = state.ray.y2 - state.ray.y1;
+        const rayLen = Math.hypot(globalRayDx, globalRayDy);
+        if (rayLen < 1e-6) break;
+        const rayUx = globalRayDx / rayLen;
+        const rayUy = globalRayDy / rayLen;
+
         const virtualX2 = currentX + globalRayDx;
         const virtualY2 = currentY + globalRayDy;
 
@@ -210,18 +218,23 @@ function performSteppingWithTermination(rayX1, rayY1, pointSpacing, viewHeight_c
         const intersection = ray.computeRayStep(coneX, coneY, pixelLeftSlope, pixelRightSlope, viewHeight_canvas);
 
         if (!intersection) {
-            // Cone step failed - either ray origin was outside cone (shouldn't happen!) or we've escaped
-            // Log warning if we're in the middle of stepping (not the first iteration)
+            // Cone step failed - either ray origin was outside cone or we've escaped
             if (step > 0) {
-                console.warn('Warning: Ray origin outside cone during stepping. This should not happen.');
+                console.warn('Warning: Ray origin outside cone during stepping. This should not happen unless ray escaped.');
             }
-            // Cone step failed → we have safely cleared this cone or encountered invalid state
             break;
         }
 
-        // Check if newly stepped position is under the surface
-        const newX = intersection.x;
-        const newY = intersection.y;
+        let advanceT = intersection.t;
+
+        // Apply "Robust Cone Step Mapping" cell-maximum tracing idea
+        // Force the minimum step to reach the next cell boundary
+        const minCellStep = computeConservativeMinStepToCellBorder(currentX, rayUx, pointSpacing);
+        advanceT = Math.max(advanceT, minCellStep);
+
+        // Calculate newly stepped position
+        const newX = currentX + rayUx * advanceT;
+        const newY = currentY + rayUy * advanceT;
 
         const surfaceData = getHeightAndCone(newX, pointSpacing, viewHeight_canvas, scaleFactor);
         const surfaceHeightCanvas = surfaceData.heightCanvas;

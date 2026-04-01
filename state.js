@@ -53,6 +53,8 @@ export const state = {
 	lastSteppingData: { stepPoints: [], currentConeIndex: -1, pointSpacing: 0, t_save_point: null, t_fail_point: null, has_hit: false }, // Last stepping state when paused
 	lastRay: { x1: 150, y1: 100, x2: 300, y2: 400 }, // Last ray position when paused
 	draggingSlider: {}, // Track which sliders are being dragged
+	uiScrollOffset: 0, // Vertical scroll offset for the control panel
+	uiMaxScrollOffset: 0, // Maximum scroll offset before hitting bottom of content
 };
 
 // Export convenience references that point to state object properties
