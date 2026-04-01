@@ -146,16 +146,16 @@ export function getHeightAndCone(xPos, pointSpacing, viewHeight_canvas, scaleFac
 
 // Perform stepping with proper termination at first surface hit
 function performSteppingWithTermination(rayX1, rayY1, pointSpacing, viewHeight_canvas, scaleFactor) {
-    const stepPoints = [{ x: rayX1, y: rayY1 }];
+    const origSurfaceData = getHeightAndCone(rayX1, pointSpacing, viewHeight_canvas, scaleFactor);
+    const stepPoints = [{ x: rayX1, y: rayY1, cone: origSurfaceData.cone }];
 
     let currentX = rayX1;
     let currentY = rayY1;
-    let t_save_point = { x: rayX1, y: rayY1, cone: null }; // Start is always safe
+    let t_save_point = { x: rayX1, y: rayY1, cone: origSurfaceData.cone }; // Start is always safe
     let t_fail_point = null;
     let has_hit = false;
 
     // Fast fail if the original ray origin is literally inside the ground geometry
-    const origSurfaceData = getHeightAndCone(currentX, pointSpacing, viewHeight_canvas, scaleFactor);
     const origSurfaceY = origSurfaceData.heightCanvas;
     if (currentY >= origSurfaceY) {
         return {
@@ -171,26 +171,20 @@ function performSteppingWithTermination(rayX1, rayY1, pointSpacing, viewHeight_c
         // Find which discrete cone we're closest to (for navigation, not algorithm logic)
         let closestIndex = findClosestHeightmapIndex(currentX, pointSpacing);
         
-        // If we're not making horizontal progress, move forward slightly
-        // Use x-position based tracking instead of cone index
+        // If we're not making horizontal progress, move forward slightly along the continuous ray
+        // This replaces the old discrete logic that forced currentX to the next integer cone index
         const minStepX = 0.5; // Minimum horizontal progress we expect
         if (step > 0 && Math.abs(currentX - stepPoints[stepPoints.length - 1].x) < minStepX) {
-            // Move to next discrete cone's x position
-            const nextIndex = closestIndex < state.heightmap.length - 1 ? closestIndex + 1 : closestIndex;
-            if (nextIndex !== closestIndex) {
-                const nextConeX = params.sideViewPadding + nextIndex * pointSpacing;
-                const rayDx = state.ray.x2 - state.ray.x1;
-                const rayDy = state.ray.y2 - state.ray.y1;
-                const rayLen = Math.hypot(rayDx, rayDy);
-                if (rayLen > 0) {
-                    const dx = nextConeX - currentX;
-                    const t = dx / rayDx;
-                    currentX = nextConeX;
-                    currentY += t * rayDy;
-                    closestIndex = nextIndex;
-                } else {
-                    break;
-                }
+            const rayDx = state.ray.x2 - state.ray.x1;
+            const rayDy = state.ray.y2 - state.ray.y1;
+            const rayLen = Math.hypot(rayDx, rayDy);
+            if (rayLen > 0) {
+                // Just push the ray slightly forward along its analytical vector to prevent floating-point stiction
+                const epsilonDist = 1.0; 
+                currentX += (rayDx / rayLen) * epsilonDist;
+                currentY += (rayDy / rayLen) * epsilonDist;
+            } else {
+                break;
             }
         }
 
@@ -242,13 +236,12 @@ function performSteppingWithTermination(rayX1, rayY1, pointSpacing, viewHeight_c
         }
 
         // Successful step - update safe position and current location
-        // Store the cone at this position for visualization
-        const stepConeData = getHeightAndCone(newX, pointSpacing, viewHeight_canvas, scaleFactor);
-        t_save_point = { x: newX, y: newY, cone: stepConeData.cone };
+        // We already computed the surface data at this new position above, no need to re-compute
+        t_save_point = { x: newX, y: newY, cone: surfaceData.cone };
         currentX = newX;
         currentY = newY;
 
-        stepPoints.push({ x: currentX, y: currentY, cone: stepConeData.cone });
+        stepPoints.push({ x: currentX, y: currentY, cone: surfaceData.cone });
     }
 
     return {
