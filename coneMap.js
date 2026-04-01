@@ -116,15 +116,12 @@ function generateConeMapExactRelaxed() {
 
 			// Only consider points above base
 			if (dh > 0) {
-				// Check if this is a limiting vertex (falling edge)
-				// A point is a limiting vertex if it's higher than at least one neighbor
-				const hLeft = j > 0 ? state.heightmap[j - 1] : baseH;
-				const hRight = h; // The current point itself
-
-				const isLimitingVertex = h > hLeft || (j < baseIdx - 1 && h > state.heightmap[j + 1]);
+				// Check if this is a limiting vertex (falling edge in the outward direction)
+				// Looking left, outward is -1
+				const isLimitingVertex = (j === 0) || (h > state.heightmap[j - 1]);
 
 				if (isLimitingVertex) {
-					const slope = dx / dh;
+					const slope = dh / dx; // Fixed: was inverted (dx / dh)
 					leftSlope = Math.max(leftSlope, slope);
 				}
 			}
@@ -138,14 +135,12 @@ function generateConeMapExactRelaxed() {
 
 			// Only consider points above base
 			if (dh > 0) {
-				// Check if this is a limiting vertex (falling edge)
-				const hLeft = h; // The current point itself
-				const hRight = j < n - 1 ? state.heightmap[j + 1] : baseH;
-
-				const isLimitingVertex = h > hRight || (j > baseIdx + 1 && h > state.heightmap[j - 1]);
+				// Check if this is a limiting vertex (falling edge in the outward direction)
+				// Looking right, outward is +1
+				const isLimitingVertex = (j === n - 1) || (h > state.heightmap[j + 1]);
 
 				if (isLimitingVertex) {
-					const slope = dx / dh;
+					const slope = dh / dx; // Fixed: was inverted (dx / dh)
 					rightSlope = Math.max(rightSlope, slope);
 				}
 			}
