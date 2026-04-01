@@ -1,6 +1,7 @@
 import { params } from '../config.js';
 import { state } from '../state.js';
 import { Ray } from '../ray.js';
+import { getHeightAndCone } from '../coneStepping.js';
 import { drawHeightmapProfile, drawHeightmapPoints } from './components/heightmap.js';
 import { drawIterationSlider } from './components/iterationSlider.js';
 import { drawConeStepping, drawLastSteppingState } from './components/coneStepping.js';
@@ -56,58 +57,23 @@ export function drawHeightmapVisualization() {
 
 		// Only show next step point if ray is also visible
 		if (state.uiState.showRay) {
-			let coneX, coneY, pixelLeftSlope, pixelRightSlope;
+			const scaleFactor = params.heightmapScale / 100;
+			const heightAndCone = getHeightAndCone(state.hoveredX, pointSpacing, viewHeight, scaleFactor);
 			
-			if (state.uiState.heightmapInterpolated) {
-				// Interpolate cone at exact hovered position
-				const scaleFactor = params.heightmapScale / 100;
-				const localX = state.hoveredX;
-				const floatIndex = (localX - params.sideViewPadding) / pointSpacing;
-				const maxIndex = state.heightmap.length - 1;
+			if (heightAndCone) {
+				const coneX = state.hoveredX;
+				const coneY = heightAndCone.heightCanvas;
+				const slopes = heightAndCone.cone.getScreenSlopes(pointSpacing, viewHeight);
+				const pixelLeftSlope = slopes.pixelLeftSlope;
+				const pixelRightSlope = slopes.pixelRightSlope;
 				
-				if (floatIndex >= 0 && floatIndex <= maxIndex) {
-					const idx0 = Math.floor(floatIndex);
-					const idx1 = Math.min(idx0 + 1, maxIndex);
-					const frac = floatIndex - idx0;
-					
-					// Interpolate height
-					const h0 = state.heightmap[idx0];
-					const h1 = state.heightmap[idx1];
-					const h = h0 * (1 - frac) + h1 * frac;
-					
-					coneX = state.hoveredX;
-					coneY = params.sideViewPadding + viewHeight - h * scaleFactor * viewHeight;
-					
-					// Interpolate slopes
-					const leftSlope0 = state.coneMap[idx0].leftSlope;
-					const leftSlope1 = state.coneMap[idx1].leftSlope;
-					const leftSlope = leftSlope0 * (1 - frac) + leftSlope1 * frac;
-					
-					const rightSlope0 = state.coneMap[idx0].rightSlope;
-					const rightSlope1 = state.coneMap[idx1].rightSlope;
-					const rightSlope = rightSlope0 * (1 - frac) + rightSlope1 * frac;
-					
-					pixelLeftSlope = leftSlope * scaleFactor * viewHeight / pointSpacing;
-					pixelRightSlope = rightSlope * scaleFactor * viewHeight / pointSpacing;
+				// Create ray and compute next step point
+				const ray = new Ray(state.ray.x1, state.ray.y1, state.ray.x2, state.ray.y2);
+				const nextStepPoint = ray.computeRayStep(coneX, coneY, pixelLeftSlope, pixelRightSlope, viewHeight);
+				
+				if (nextStepPoint) {
+					drawNextStepPoint(nextStepPoint);
 				}
-			} else {
-				// Use nearest cone
-				const cone = state.coneMap[state.hoveredIndex];
-				const pos = cone.getScreenPosition(pointSpacing, viewHeight, params.sideViewPadding);
-				coneX = pos.x;
-				coneY = pos.y;
-				
-				const slopes = cone.getScreenSlopes(pointSpacing, viewHeight);
-				pixelLeftSlope = slopes.pixelLeftSlope;
-				pixelRightSlope = slopes.pixelRightSlope;
-			}
-			
-			// Create ray and compute next step point
-			const ray = new Ray(state.ray.x1, state.ray.y1, state.ray.x2, state.ray.y2);
-			const nextStepPoint = ray.computeRayStep(coneX, coneY, pixelLeftSlope, pixelRightSlope, viewHeight);
-			
-			if (nextStepPoint) {
-				drawNextStepPoint(nextStepPoint);
 			}
 		}
 	}

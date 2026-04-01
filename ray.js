@@ -54,7 +54,7 @@ export class Ray {
 
 	// Compute safe stepping distance along ray for a given cone
 	// Returns {x, y, t} point where ray intersects cone boundary, or null if no intersection
-	// Assumes ray origin is inside the cone
+	// Only valid when ray origin is inside the cone - will return null if origin is outside
 	// Slopes provided should be in math/pixel space (dz/dx)
 	computeRayStep(coneX, coneY, pixelLeftSlope, pixelRightSlope, viewHeight) {
 		// Get ray direction
@@ -79,27 +79,28 @@ export class Ray {
 		const mathPz0 = mathRayY - mathConeY; // z is height above apex
 		
 		const mathDx = rayUx;
-		const mathDz = -rayUy; // math mathRayY goes up, p5 y goes down
+		const mathDz = -rayUy; // math z goes up, p5 y goes down
 
 		// Are we inside the solid bounds of the cone?
 		// We use a small epsilon to tolerate floating point errors on the safe boundary
-		let insideSolid = false;
+		let outsideSolid = false;
 		if (mathPz0 <= 0) {
-			insideSolid = true;
+			outsideSolid = true;
 		} else if (mathPx0 > 0) {
-			if (mathPz0 < pixelRightSlope * mathPx0 - 1e-3) insideSolid = true;
+			if (mathPz0 < pixelRightSlope * mathPx0 - 1e-3) outsideSolid = true;
 		} else {
-			if (mathPz0 < pixelLeftSlope * -mathPx0 - 1e-3) insideSolid = true;
+			if (mathPz0 < pixelLeftSlope * -mathPx0 - 1e-3) outsideSolid = true;
 		}
 
-		if (insideSolid) {
-			// Ray origin is inside the bounding solid.
-			// Return t=0 to allow epsilon pushing to break us out of the local overlap.
-			return { x: this.x1, y: this.y1, t: 0 };
+		// For visualization, we want to show intersections when ray origin is INSIDE the cone
+		// When it's outside, there's no meaningful stepping intersection to show
+		if (outsideSolid) {
+			return null;
 		}
 
 		let validTs = [];
 		
+		// Ray is inside the cone - compute where it would exit
 		// Right plane (x > 0): z = pixelRightSlope * x
 		// At t, x(t) = mathPx0 + t*mathDx
 		// Intersect when: mathPz0 + t*mathDz = pixelRightSlope * (mathPx0 + t*mathDx)

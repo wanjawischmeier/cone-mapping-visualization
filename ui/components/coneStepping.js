@@ -17,7 +17,7 @@ export function drawConeStepping(viewWidth, viewHeight) {
 	const stepPoints = state.steppingData.stepPoints;
 
 	// Draw ALL step points (always show the full path)
-	for (let i = 0; i < stepPoints.length; i++) {
+	for (let i = 1; i < stepPoints.length; i++) {
 		const pt = stepPoints[i];
 		// Only draw if within bounds
 		if (pt.x >= boxMinX && pt.x <= boxMaxX && pt.y >= boxMinY && pt.y <= boxMaxY) {
@@ -28,65 +28,89 @@ export function drawConeStepping(viewWidth, viewHeight) {
 		}
 	}
 
-	// Draw t_save point (last known safe position) in green
+	// Draw t_save point (last known safe position) in green with its cone
 	if (state.steppingData.t_save_point) {
 		const pt = state.steppingData.t_save_point;
 		if (pt.x >= boxMinX && pt.x <= boxMaxX && pt.y >= boxMinY && pt.y <= boxMaxY) {
 			fill(100, 255, 100);
 			noStroke();
 			circle(pt.x, pt.y, 10);
+			
+			// Draw cone at t_save position
+			if (pt.cone) {
+				const coneHeightY = pt.cone.getScreenPosition(pointSpacing, viewHeight_canvas, params.sideViewPadding).y;
+				drawDottedLine(pt.x, pt.y, pt.x, coneHeightY, [100, 255, 100, 75]);
+				drawConeAtPosition(pt.x, pt.cone, pointSpacing, viewHeight_canvas, [100, 255, 100, 75], boxMinX, boxMinY, boxMaxX, boxMaxY);
+			}
 		}
 	}
 
-	// Draw t_fail point (first failure position) in red
+	// Draw t_fail point (first failure position) in red with its cone
 	if (state.steppingData.t_fail_point) {
 		const pt = state.steppingData.t_fail_point;
 		if (pt.x >= boxMinX && pt.x <= boxMaxX && pt.y >= boxMinY && pt.y <= boxMaxY) {
 			fill(255, 100, 100);
 			noStroke();
 			circle(pt.x, pt.y, 10);
+			
+			// Draw cone at t_fail position
+			if (pt.cone) {
+				const coneHeightY = pt.cone.getScreenPosition(pointSpacing, viewHeight_canvas, params.sideViewPadding).y;
+				drawDottedLine(pt.x, pt.y, pt.x, coneHeightY, [255, 100, 100, 75]);
+				drawConeAtPosition(pt.x, pt.cone, pointSpacing, viewHeight_canvas, [255, 100, 100, 75], boxMinX, boxMinY, boxMaxX, boxMaxY);
+			}
 		}
 	}
 
 	// Draw cone at current iteration
-	if (state.currentIteration >= 0 && state.currentIteration < stepPoints.length) {
+	if (state.currentIteration > 0 && state.currentIteration < stepPoints.length) {
 		const currentPt = stepPoints[state.currentIteration];
-		const currentConeIndex = currentPt.coneIndex !== undefined ? currentPt.coneIndex : state.steppingData.currentConeIndex;
-
-		if (currentConeIndex >= 0 && currentConeIndex < state.coneMap.length) {
-			const cone = state.coneMap[currentConeIndex];
-			if (cone && currentConeIndex < state.heightmap.length) {
-				drawConeAt(currentConeIndex, cone, pointSpacing, viewHeight_canvas, scaleFactor, [200, 100, 200], boxMinX, boxMinY, boxMaxX, boxMaxY);
-			}
+		if (currentPt.cone) {
+			const coneHeightY = currentPt.cone.getScreenPosition(pointSpacing, viewHeight_canvas, params.sideViewPadding).y;
+			drawDottedLine(currentPt.x, currentPt.y, currentPt.x, coneHeightY, [200, 100, 200, 75]);
+			drawConeAtPosition(currentPt.x, currentPt.cone, pointSpacing, viewHeight_canvas, [200, 100, 200, 75], boxMinX, boxMinY, boxMaxX, boxMaxY);
 		}
 	}
 
 	// Draw cone at t_save (green with reduced opacity)
-	if (state.steppingData.t_save_point && state.steppingData.t_save_point.coneIndex !== undefined) {
-		const coneIndex = state.steppingData.t_save_point.coneIndex;
-		if (coneIndex >= 0 && coneIndex < state.coneMap.length) {
-			const cone = state.coneMap[coneIndex];
-			if (cone && coneIndex < state.heightmap.length) {
-				drawConeAt(coneIndex, cone, pointSpacing, viewHeight_canvas, scaleFactor, [100, 255, 100, 80], boxMinX, boxMinY, boxMaxX, boxMaxY);
-			}
-		}
+	if (state.steppingData.t_save_point && state.steppingData.t_save_point.cone) {
+		drawConeAtPosition(state.steppingData.t_save_point.x, state.steppingData.t_save_point.cone, pointSpacing, viewHeight_canvas, [100, 255, 100, 80], boxMinX, boxMinY, boxMaxX, boxMaxY);
 	}
 
 	// Draw cone at t_fail (red with reduced opacity)
-	if (state.steppingData.t_fail_point && state.steppingData.t_fail_point.coneIndex !== undefined) {
-		const coneIndex = state.steppingData.t_fail_point.coneIndex;
-		if (coneIndex >= 0 && coneIndex < state.coneMap.length) {
-			const cone = state.coneMap[coneIndex];
-			if (cone && coneIndex < state.heightmap.length) {
-				drawConeAt(coneIndex, cone, pointSpacing, viewHeight_canvas, scaleFactor, [255, 100, 100, 80], boxMinX, boxMinY, boxMaxX, boxMaxY);
-			}
-		}
+	if (state.steppingData.t_fail_point && state.steppingData.t_fail_point.cone) {
+		drawConeAtPosition(state.steppingData.t_fail_point.x, state.steppingData.t_fail_point.cone, pointSpacing, viewHeight_canvas, [255, 100, 100, 80], boxMinX, boxMinY, boxMaxX, boxMaxY);
 	}
 }
 
-// Helper function to draw a cone at a specific index
-function drawConeAt(coneIndex, cone, pointSpacing, viewHeight_canvas, scaleFactor, color, boxMinX, boxMinY, boxMaxX, boxMaxY) {
-	const { x: coneX, y: coneHeightY } = cone.getScreenPosition(pointSpacing, viewHeight_canvas, params.sideViewPadding);
+// Helper function to draw a dotted line
+function drawDottedLine(x1, y1, x2, y2, color) {
+	stroke(...color);
+	strokeWeight(1);
+	
+	const dashLength = 5;
+	const gapLength = 5;
+	const dx = x2 - x1;
+	const dy = y2 - y1;
+	const distance = Math.hypot(dx, dy);
+	const steps = Math.ceil(distance / (dashLength + gapLength));
+	const ux = dx / distance;
+	const uy = dy / distance;
+	
+	for (let i = 0; i < steps; i++) {
+		const dashStart = i * (dashLength + gapLength);
+		const dashEnd = dashStart + dashLength;
+		const x1d = x1 + ux * dashStart;
+		const y1d = y1 + uy * dashStart;
+		const x2d = x1 + ux * Math.min(dashEnd, distance);
+		const y2d = y1 + uy * Math.min(dashEnd, distance);
+		line(x1d, y1d, x2d, y2d);
+	}
+}
+
+// Helper function to draw a cone at a specific position
+function drawConeAtPosition(coneX, cone, pointSpacing, viewHeight_canvas, color, boxMinX, boxMinY, boxMaxX, boxMaxY) {
+	const coneHeightY = cone.getScreenPosition(pointSpacing, viewHeight_canvas, params.sideViewPadding).y;
 	const { pixelLeftSlope, pixelRightSlope } = cone.getScreenSlopes(pointSpacing, viewHeight_canvas);
 
 	// Draw left cone edge
@@ -162,25 +186,13 @@ export function drawLastSteppingState(viewWidth, viewHeight) {
 	}
 
 	// Draw cone at t_save (green with reduced opacity)
-	if (state.lastSteppingData.t_save_point && state.lastSteppingData.t_save_point.coneIndex !== undefined) {
-		const coneIndex = state.lastSteppingData.t_save_point.coneIndex;
-		if (coneIndex >= 0 && coneIndex < state.coneMap.length) {
-			const cone = state.coneMap[coneIndex];
-			if (cone && coneIndex < state.heightmap.length) {
-				drawConeAt(coneIndex, cone, pointSpacing, viewHeight_canvas, scaleFactor, [100, 255, 100, 50], boxMinX, boxMinY, boxMaxX, boxMaxY);
-			}
-		}
+	if (state.lastSteppingData.t_save_point && state.lastSteppingData.t_save_point.cone) {
+		drawConeAtPosition(state.lastSteppingData.t_save_point.x, state.lastSteppingData.t_save_point.cone, pointSpacing, viewHeight_canvas, [100, 255, 100, 50], boxMinX, boxMinY, boxMaxX, boxMaxY);
 	}
 
 	// Draw cone at t_fail (red with reduced opacity)
-	if (state.lastSteppingData.t_fail_point && state.lastSteppingData.t_fail_point.coneIndex !== undefined) {
-		const coneIndex = state.lastSteppingData.t_fail_point.coneIndex;
-		if (coneIndex >= 0 && coneIndex < state.coneMap.length) {
-			const cone = state.coneMap[coneIndex];
-			if (cone && coneIndex < state.heightmap.length) {
-				drawConeAt(coneIndex, cone, pointSpacing, viewHeight_canvas, scaleFactor, [255, 100, 100, 50], boxMinX, boxMinY, boxMaxX, boxMaxY);
-			}
-		}
+	if (state.lastSteppingData.t_fail_point && state.lastSteppingData.t_fail_point.cone) {
+		drawConeAtPosition(state.lastSteppingData.t_fail_point.x, state.lastSteppingData.t_fail_point.cone, pointSpacing, viewHeight_canvas, [255, 100, 100, 50], boxMinX, boxMinY, boxMaxX, boxMaxY);
 	}
 
 	// Draw the old ray with low opacity

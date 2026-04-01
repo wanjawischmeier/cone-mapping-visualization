@@ -1,6 +1,7 @@
 import { params } from './config.js';
 import { state } from './state.js';
 import { Ray } from './ray.js';
+import { Cone } from './coneMap.js';
 
 // Perform cone stepping along the ray and returns step data
 export function performConeStepping() {
@@ -66,34 +67,42 @@ function findClosestHeightmapIndex(xPos, pointSpacing, excludeIndex = -1) {
 }
 
 // Get nearest neighbor height and cone at a given x position
-function getNearestHeightAndCone(xPos, pointSpacing, viewHeight_canvas, scaleFactor) {
+export function getNearestHeightAndCone(xPos, pointSpacing, viewHeight_canvas, scaleFactor) {
     const index = findClosestHeightmapIndex(xPos, pointSpacing);
     const heightNormalized = state.heightmap[index];
     const heightCanvas = params.sideViewPadding + viewHeight_canvas - heightNormalized * scaleFactor * viewHeight_canvas;
     return {
         heightCanvas,
-        coneIndex: index,
-        cone: state.coneMap[index]
+        cone: state.coneMap[index],
+        x: xPos
     };
 }
 
 // Get interpolated height and cone at a given x position
-// Interpolates height linearly, and uses weighted cone based on proximity
-function getInterpolatedHeightAndCone(xPos, pointSpacing, viewHeight_canvas, scaleFactor) {
+// Returns an actual Cone object with interpolated slopes, not a reference to a discrete cone
+export function getInterpolatedHeightAndCone(xPos, pointSpacing, viewHeight_canvas, scaleFactor) {
     const localX = xPos - params.sideViewPadding;
     const floatIndex = localX / pointSpacing;
     const maxIndex = state.heightmap.length - 1;
     
-    // Clamp to bounds
+    // Clamp to bounds and use nearest cone at boundary
     if (floatIndex <= 0) {
         const h = state.heightmap[0];
         const heightCanvas = params.sideViewPadding + viewHeight_canvas - h * scaleFactor * viewHeight_canvas;
-        return { heightCanvas, coneIndex: 0, cone: state.coneMap[0] };
+        return { 
+            heightCanvas, 
+            cone: state.coneMap[0],
+            x: xPos
+        };
     }
     if (floatIndex >= maxIndex) {
         const h = state.heightmap[maxIndex];
         const heightCanvas = params.sideViewPadding + viewHeight_canvas - h * scaleFactor * viewHeight_canvas;
-        return { heightCanvas, coneIndex: maxIndex, cone: state.coneMap[maxIndex] };
+        return { 
+            heightCanvas, 
+            cone: state.coneMap[maxIndex],
+            x: xPos
+        };
     }
     
     // Linear interpolation between two nearest points
@@ -101,24 +110,33 @@ function getInterpolatedHeightAndCone(xPos, pointSpacing, viewHeight_canvas, sca
     const idx1 = idx0 + 1;
     const frac = floatIndex - idx0;
     
+    // Interpolate height
     const h0 = state.heightmap[idx0];
     const h1 = state.heightmap[idx1];
     const h = h0 * (1 - frac) + h1 * frac;
-    
     const heightCanvas = params.sideViewPadding + viewHeight_canvas - h * scaleFactor * viewHeight_canvas;
     
-    // Use the closer cone for intersection purposes, or blend if they're equally close
-    const coneIndex = frac < 0.5 ? idx0 : idx1;
+    // Interpolate slopes to create a new virtual cone
+    const leftSlope0 = state.coneMap[idx0].leftSlope;
+    const leftSlope1 = state.coneMap[idx1].leftSlope;
+    const leftSlope = leftSlope0 * (1 - frac) + leftSlope1 * frac;
+    
+    const rightSlope0 = state.coneMap[idx0].rightSlope;
+    const rightSlope1 = state.coneMap[idx1].rightSlope;
+    const rightSlope = rightSlope0 * (1 - frac) + rightSlope1 * frac;
+    
+    // Create an interpolated cone object with height h
+    const interpolatedCone = new Cone(h, leftSlope, rightSlope, -1); // index -1 means virtual/interpolated
     
     return {
         heightCanvas,
-        coneIndex,
-        cone: state.coneMap[coneIndex]
+        cone: interpolatedCone,
+        x: xPos
     };
 }
 
 // Get height and cone at a given x position, using either interpolated or nearest neighbor based on toggle
-function getHeightAndCone(xPos, pointSpacing, viewHeight_canvas, scaleFactor) {
+export function getHeightAndCone(xPos, pointSpacing, viewHeight_canvas, scaleFactor) {
     if (state.uiState.heightmapInterpolated) {
         return getInterpolatedHeightAndCone(xPos, pointSpacing, viewHeight_canvas, scaleFactor);
     } else {
@@ -128,14 +146,13 @@ function getHeightAndCone(xPos, pointSpacing, viewHeight_canvas, scaleFactor) {
 
 // Perform stepping with proper termination at first surface hit
 function performSteppingWithTermination(rayX1, rayY1, pointSpacing, viewHeight_canvas, scaleFactor) {
-    const stepPoints = [{ x: rayX1, y: rayY1, coneIndex: -1 }];
+    const stepPoints = [{ x: rayX1, y: rayY1 }];
 
     let currentX = rayX1;
     let currentY = rayY1;
-    let t_save_point = { x: rayX1, y: rayY1, coneIndex: -1 }; // Start is always safe
+    let t_save_point = { x: rayX1, y: rayY1, cone: null }; // Start is always safe
     let t_fail_point = null;
     let has_hit = false;
-    let lastConeIndex = -1; // Track which cone we last stepped within
 
     // Fast fail if the original ray origin is literally inside the ground geometry
     const origSurfaceData = getHeightAndCone(currentX, pointSpacing, viewHeight_canvas, scaleFactor);
@@ -143,31 +160,31 @@ function performSteppingWithTermination(rayX1, rayY1, pointSpacing, viewHeight_c
     if (currentY >= origSurfaceY) {
         return {
             stepPoints,
-            currentConeIndex: origSurfaceData.coneIndex,
-            t_save_point,
-            t_fail_point: { x: currentX, y: currentY, coneIndex: origSurfaceData.coneIndex },
+            currentConeIndex: -1,
+            t_save_point: { x: currentX, y: currentY, cone: origSurfaceData.cone },
+            t_fail_point: { x: currentX, y: currentY, cone: origSurfaceData.cone },
             has_hit: true
         };
     }
 
     for (let step = 0; step < params.rayIterations; step++) {
-        // 1. Find cone at current position
+        // Find which discrete cone we're closest to (for navigation, not algorithm logic)
         let closestIndex = findClosestHeightmapIndex(currentX, pointSpacing);
-
-        // If we're still in the same cone as the last iteration, force ourselves to the next data point
-        // to ensure we always make forward progress through the cone field
-        if (closestIndex === lastConeIndex && lastConeIndex >= 0) {
+        
+        // If we're not making horizontal progress, move forward slightly
+        // Use x-position based tracking instead of cone index
+        const minStepX = 0.5; // Minimum horizontal progress we expect
+        if (step > 0 && Math.abs(currentX - stepPoints[stepPoints.length - 1].x) < minStepX) {
+            // Move to next discrete cone's x position
             const nextIndex = closestIndex < state.heightmap.length - 1 ? closestIndex + 1 : closestIndex;
             if (nextIndex !== closestIndex) {
-                // Force move to next cone's x position
                 const nextConeX = params.sideViewPadding + nextIndex * pointSpacing;
                 const rayDx = state.ray.x2 - state.ray.x1;
                 const rayDy = state.ray.y2 - state.ray.y1;
                 const rayLen = Math.hypot(rayDx, rayDy);
                 if (rayLen > 0) {
                     const dx = nextConeX - currentX;
-                    // Project forward along the ray direction to reach the next cone's x
-                    const t = dx / rayDx; // scalar projection
+                    const t = dx / rayDx;
                     currentX = nextConeX;
                     currentY += t * rayDy;
                     closestIndex = nextIndex;
@@ -177,56 +194,61 @@ function performSteppingWithTermination(rayX1, rayY1, pointSpacing, viewHeight_c
             }
         }
 
-        const cone = state.coneMap[closestIndex];
-        const { x: coneX, y: coneY } = cone.getScreenPosition(pointSpacing, viewHeight_canvas, params.sideViewPadding);
+        // Get the cone at current position (may be interpolated or discrete)
+        const coneData = getHeightAndCone(currentX, pointSpacing, viewHeight_canvas, scaleFactor);
+        const cone = coneData.cone;
+        
+        // Cone apex position for algorithm use
+        const coneX = currentX;
+        const coneY = coneData.heightCanvas;
 
-        // We must calculate the global, constant direction of the master ray
-        // and project that direction onto our localized current start position
-        // so we don't accidentally reverse direction when stepping PAST state.ray.x2
+        // Global ray direction (constant)
         const globalRayDx = state.ray.x2 - state.ray.x1;
         const globalRayDy = state.ray.y2 - state.ray.y1;
         const virtualX2 = currentX + globalRayDx;
         const virtualY2 = currentY + globalRayDy;
 
-        // Create ray starting from current position but matching strictly the global master direction
+        // Create ray starting from current position
         const ray = new Ray(currentX, currentY, virtualX2, virtualY2);
 
-        // 2. Compute safe step using algebraic ray-plane intersection
+        // Compute safe step using algebraic ray-plane intersection
         const { pixelLeftSlope, pixelRightSlope } = cone.getScreenSlopes(pointSpacing, viewHeight_canvas);
         const intersection = ray.computeRayStep(coneX, coneY, pixelLeftSlope, pixelRightSlope, viewHeight_canvas);
 
         if (!intersection) {
-            // Cone step failed → it means we have safely cleared this cone. 
-            // In a real tracer, this could mean we flew entirely out of the heightfield 
-            // without hitting anything, OR we are past the end of the cone geometry.
+            // Cone step failed - either ray origin was outside cone (shouldn't happen!) or we've escaped
+            // Log warning if we're in the middle of stepping (not the first iteration)
+            if (step > 0) {
+                console.warn('Warning: Ray origin outside cone during stepping. This should not happen.');
+            }
+            // Cone step failed → we have safely cleared this cone or encountered invalid state
             break;
         }
 
-        // 3. COMPUTE RAY HEIGHT at new position
+        // Check if newly stepped position is under the surface
         const newX = intersection.x;
         const newY = intersection.y;
 
-        // 4. Check if the newly stepped POSITION is under the surface
         const surfaceData = getHeightAndCone(newX, pointSpacing, viewHeight_canvas, scaleFactor);
         const surfaceHeightCanvas = surfaceData.heightCanvas;
 
-        // Check if the newly stepped POSITION is strictly under the surface (hit!)
+        // Check if the ray is below the surface (hit!)
         if (newY >= surfaceHeightCanvas) {
             if (!has_hit) {
-                // Determine the exact point the ray struck the ground
-                t_fail_point = { x: newX, y: newY, coneIndex: surfaceData.coneIndex };
+                t_fail_point = { x: newX, y: newY, cone: surfaceData.cone };
                 has_hit = true;
             }
             break;
         }
 
-        // 6. SUCCESSFUL STEP - update safe position
-        t_save_point = { x: newX, y: newY, coneIndex: surfaceData.coneIndex };
+        // Successful step - update safe position and current location
+        // Store the cone at this position for visualization
+        const stepConeData = getHeightAndCone(newX, pointSpacing, viewHeight_canvas, scaleFactor);
+        t_save_point = { x: newX, y: newY, cone: stepConeData.cone };
         currentX = newX;
         currentY = newY;
-        lastConeIndex = surfaceData.coneIndex;
 
-        stepPoints.push({ x: currentX, y: currentY, coneIndex: closestIndex });
+        stepPoints.push({ x: currentX, y: currentY, cone: stepConeData.cone });
     }
 
     return {
