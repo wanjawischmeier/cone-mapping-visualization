@@ -14,8 +14,10 @@ function setup() {
 
 	createUIPanel();
 
-	// Generate initial heightmap only
-	generateRandomHeightmap();
+	// Generate initial heightmap if not loaded from state
+	if (state.heightmap.length === 0) {
+		generateRandomHeightmap();
+	}
 
 	// Clamp ray positions to heightmap area
 	clampRayToHeightmapArea();

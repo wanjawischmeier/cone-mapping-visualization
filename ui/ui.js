@@ -1,7 +1,7 @@
 import { params } from '../config.js';
 import { coneMap, state } from '../state.js';
 import { generateRandomHeightmap } from '../heightmap.js';
-import { generateConeMap } from '../coneMap.js';
+import { generateConeMap, clearConeMapAndStepping } from '../coneMap.js';
 import { drawButton } from './components/button.js';
 import { drawSlider } from './components/slider.js';
 import { saveState } from '../storage.js';
@@ -132,8 +132,7 @@ export function drawUIPanel() {
 
 	if (isMouseClicked(uiPanelX + 10, currentUIY, modeButtonWidth, 20)) {
 		params.coneMode = 'isotropic';
-		state.coneMap.length = 0;
-		generateConeMap();
+		clearConeMapAndStepping();
 		saveState();
 	}
 
@@ -150,14 +149,16 @@ export function drawUIPanel() {
 
 	if (isMouseClicked(uiPanelX + 20 + modeButtonWidth, currentUIY, modeButtonWidth, 20)) {
 		params.coneMode = 'anisotropic';
-		state.coneMap.length = 0;
-		generateConeMap();
+		clearConeMapAndStepping();
 		saveState();
 	}
 
 	currentUIY += 40;
 
 	// Cone Generation Mode selection
+	fill(0);
+	noStroke();
+	textSize(10);
 	textAlign(LEFT);
 	text("Generation:", uiPanelX + 10, currentUIY);
 	currentUIY += 15;
@@ -178,8 +179,7 @@ export function drawUIPanel() {
 
 	if (isMouseClicked(uiPanelX + 10, currentUIY, genModeButtonWidth, 20)) {
 		params.coneGenerationMode = 'conservative';
-		state.coneMap.length = 0;
-		generateConeMap();
+		clearConeMapAndStepping();
 		saveState();
 	}
 
@@ -196,8 +196,7 @@ export function drawUIPanel() {
 
 	if (isMouseClicked(uiPanelX + 20 + genModeButtonWidth, currentUIY, genModeButtonWidth, 20)) {
 		params.coneGenerationMode = 'exactRelaxed';
-		state.coneMap.length = 0;
-		generateConeMap();
+		clearConeMapAndStepping();
 		saveState();
 	}
 
@@ -206,8 +205,7 @@ export function drawUIPanel() {
 	// Toggle Bilinear Fix
 	if (drawCheckbox("Bilinear Fix", params.applyBilinearFix, uiPanelX + 10, currentUIY)) {
 		params.applyBilinearFix = !params.applyBilinearFix;
-		state.coneMap.length = 0;
-		generateConeMap();
+		clearConeMapAndStepping();
 		saveState();
 	}
 	currentUIY += 30;
@@ -238,9 +236,9 @@ export function drawUIPanel() {
 	// Toggle Heightmap interpolation mode
 	if (drawCheckbox("Heightmap Interpolated", state.uiState.heightmapInterpolated, uiPanelX + 10, currentUIY)) {
 		state.uiState.toggleHeightmapMode();
-		// Regenerate cone map if it exists, to apply/remove the bilinear fix
+		// Clear cone map so it reflects the new interpolation setting
 		if (coneMap.length > 0) {
-			generateConeMap();
+			clearConeMapAndStepping();
 		}
 		saveState();
 	}

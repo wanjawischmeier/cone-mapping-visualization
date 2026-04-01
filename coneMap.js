@@ -37,6 +37,13 @@ export class Cone {
 	}
 }
 
+// Clear cone map and all stepping data
+export function clearConeMapAndStepping() {
+	state.coneMap.length = 0;
+	state.steppingData = { stepPoints: [], currentConeIndex: -1, pointSpacing: 0, t_save_point: null, t_fail_point: null, has_hit: false };
+	state.lastSteppingData = { stepPoints: [], currentConeIndex: -1, pointSpacing: 0, t_save_point: null, t_fail_point: null, has_hit: false };
+}
+
 export function generateConeMap() {
 	if (state.heightmap.length === 0) {
 		console.warn("Cannot generate cone map: heightmap is empty");

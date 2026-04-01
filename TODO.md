@@ -8,4 +8,4 @@
 - [ ] How does interpolation work?
 - [ ] How does stepping stop work?
 - [x] Store parameters in local storage
-  - [ ] Fix: heightmap not restored, new on every page load
+  - [x] Fix: heightmap not restored, new on every page load
