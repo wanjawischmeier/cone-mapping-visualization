@@ -1,18 +1,18 @@
-import { params } from '../config.js';
-import { coneMap, state } from '../state.js';
-import { generateRandomHeightmap } from '../heightmap.js';
-import { generateConeMap, clearConeMapAndStepping } from '../coneMap.js';
-import { drawButton } from './components/button.js';
-import { drawSlider } from './components/slider.js';
-import { drawCheckbox } from './components/checkbox.js'
-import { saveState } from '../storage.js';
-import { isMouseClicked } from './inputEvents.js';
+import { params } from '../../../config.js';
+import { coneMap, state } from '../../../state.js';
+import { generateRandomHeightmap } from '../../../heightmap.js';
+import { generateConeMap, clearConeMapAndStepping } from '../../../coneMap.js';
+import { drawButton } from '../components/button.js';
+import { drawSlider } from '../components/slider.js';
+import { drawCheckbox } from '../components/checkbox.js'
+import { saveState } from '../../storage.js';
+import { isMouseClicked } from '../inputEvents.js';
 
-export function createUIPanel() {
+export function createControlPanel() {
 	// This is handled in drawUIPanel for dynamic layout
 }
 
-export function drawUIPanel() {
+export function drawControlPanel() {
 	const uiPanelX = 0;
 	const uiPanelY = 0;
 	let currentUIY = 25;

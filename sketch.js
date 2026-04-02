@@ -1,7 +1,7 @@
 import { params } from './config.js';
 import { generateRandomHeightmap } from './heightmap.js';
-import { drawHeightmapVisualization } from './ui/visualization.js';
-import { createUIPanel, drawUIPanel } from './ui/ui.js';
+import { drawHeightmapVisualization } from './ui/views/heightmapVisualization.js';
+import { createControlPanel, drawControlPanel } from './ui/views/controlPanel.js';
 import { state } from './state.js';
 import { performConeStepping } from './coneStepping.js';
 import { loadState, saveState } from './storage.js';
@@ -12,7 +12,7 @@ function setup() {
 	// Load saved state from localStorage
 	loadState();
 
-	createUIPanel();
+	createControlPanel();
 
 	// Generate initial heightmap if not loaded from state
 	if (state.heightmap.length === 0) {
@@ -33,7 +33,7 @@ function draw() {
 	pop();
 
 	// Draw parameter sliders on the left
-	drawUIPanel();
+	drawControlPanel();
 
 	// Update cone stepping data for visualization
 	performConeStepping();
