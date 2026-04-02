@@ -1,6 +1,6 @@
 import { params } from '../../config.js';
 import { state } from '../../state.js';
-import { clipLineToBox } from './shapes.js';
+import { clipLineToBox, drawDottedLine } from './shapes.js';
 
 export function drawConeStepping(viewWidth, viewHeight) {
 	if (!state.steppingData || !state.steppingData.stepPoints.length) return;
@@ -80,31 +80,6 @@ export function drawConeStepping(viewWidth, viewHeight) {
 	// Draw cone at t_fail (red with reduced opacity)
 	if (state.steppingData.t_fail_point && state.steppingData.t_fail_point.cone) {
 		drawConeAtPosition(state.steppingData.t_fail_point.x, state.steppingData.t_fail_point.cone, pointSpacing, viewHeight_canvas, [255, 100, 100, 80], boxMinX, boxMinY, boxMaxX, boxMaxY);
-	}
-}
-
-// Helper function to draw a dotted line
-function drawDottedLine(x1, y1, x2, y2, color) {
-	stroke(...color);
-	strokeWeight(1);
-	
-	const dashLength = 5;
-	const gapLength = 5;
-	const dx = x2 - x1;
-	const dy = y2 - y1;
-	const distance = Math.hypot(dx, dy);
-	const steps = Math.ceil(distance / (dashLength + gapLength));
-	const ux = dx / distance;
-	const uy = dy / distance;
-	
-	for (let i = 0; i < steps; i++) {
-		const dashStart = i * (dashLength + gapLength);
-		const dashEnd = dashStart + dashLength;
-		const x1d = x1 + ux * dashStart;
-		const y1d = y1 + uy * dashStart;
-		const x2d = x1 + ux * Math.min(dashEnd, distance);
-		const y2d = y1 + uy * Math.min(dashEnd, distance);
-		line(x1d, y1d, x2d, y2d);
 	}
 }
 

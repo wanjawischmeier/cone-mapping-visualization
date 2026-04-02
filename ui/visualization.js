@@ -5,7 +5,7 @@ import { getHeightAndCone } from '../coneStepping.js';
 import { drawHeightmapProfile, drawHeightmapPoints } from './components/heightmap.js';
 import { drawIterationSlider } from './components/iterationSlider.js';
 import { drawConeStepping, drawLastSteppingState } from './components/coneStepping.js';
-import { drawHoveredCone, drawNextStepPoint, drawRay, clipLineToBox } from './components/shapes.js';
+import { drawHoveredCone, drawNextStepPoint, drawRay, clipLineToBox, drawDottedLine } from './components/shapes.js';
 
 export function drawHeightmapVisualization() {
 	if (state.heightmap.length === 0) {
@@ -53,9 +53,8 @@ export function drawHeightmapVisualization() {
 
 	// Draw cone visualization (always show hovered cone if hovering)
 	if (state.coneMap.length > 0 && state.hoveredIndex >= 0 && state.uiState.showHoveredCone) {
-		drawHoveredCone(pointSpacing, viewHeight, viewWidth);
-
 		// Only show next step point if ray is also visible
+		let rayOriginInsideCone = false;
 		if (state.uiState.showRay) {
 			const scaleFactor = params.heightmapScale / 100;
 			const heightAndCone = getHeightAndCone(state.hoveredX, pointSpacing, viewHeight, scaleFactor);
@@ -72,10 +71,25 @@ export function drawHeightmapVisualization() {
 				const nextStepPoint = ray.computeRayStep(coneX, coneY, pixelLeftSlope, pixelRightSlope, viewHeight);
 				
 				if (nextStepPoint) {
+					rayOriginInsideCone = true;
+					
+					// Compute intersection of vertical line at coneX with the ray
+					const rayDx = state.ray.x2 - state.ray.x1;
+					const rayDy = state.ray.y2 - state.ray.y1;
+					const t = (coneX - state.ray.x1) / rayDx;
+					
+					if (t >= 0 && Math.abs(rayDx) > 1e-6) {
+						const intersectionY = state.ray.y1 + t * rayDy;
+						// Draw vertical dotted line from cone apex to the ray intersection point
+						drawDottedLine(coneX, coneY, coneX, intersectionY, [255, 165, 100, 200]);
+					}
+					
 					drawNextStepPoint(nextStepPoint);
 				}
 			}
 		}
+		
+		drawHoveredCone(pointSpacing, viewHeight, viewWidth, rayOriginInsideCone);
 	}
 
 	function updateHoveredIndexFromMouse(pointSpacing, viewHeight, viewWidth) {

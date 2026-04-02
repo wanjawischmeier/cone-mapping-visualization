@@ -9,3 +9,6 @@
 - [ ] How does stepping stop work?
 - [x] Store parameters in local storage
   - [x] Fix: heightmap not restored, new on every page load
+- [ ] Stepping fails when looking straight down
+- [ ] Temporal reuse
+  - [ ] Distance from frustum to ray origin
