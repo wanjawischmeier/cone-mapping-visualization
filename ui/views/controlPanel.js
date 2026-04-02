@@ -1,13 +1,9 @@
 import { params } from '../../../config.js';
 import { state } from '../../../state.js';
-import { drawCheckbox } from '../components/checkbox.js';
-import { drawGenerationButtons } from '../components/generationButtons.js';
-import { drawSteppingButton } from '../components/steppingButton.js';
-import { drawToggleButtonPair } from '../components/toggleButtonPair.js';
-import { drawVisibilityToggles } from '../components/visibilityToggles.js';
-import { drawParametersSection } from '../components/parametersSection.js';
-import { clearConeMapAndStepping } from '../../../coneMap.js';
-import { saveState } from '../../storage.js';
+import { drawHeightmapSettings } from '../components/heightmapSettings.js';
+import { drawConeMapSettings } from '../components/coneMapSettings.js';
+import { drawVisualizationSettings } from '../components/visualizationSettings.js';
+import { drawResetButton } from '../components/resetButton.js';
 
 // Control panel layout constants
 const PANEL_PADDING_X = 10; // Left and right padding inside panel
@@ -34,10 +30,13 @@ export function drawControlPanel() {
 		mouseY >= uiPanelY && mouseY <= uiPanelY + params.canvasHeight) {
 		// Mouse wheel scroll (p5.js provides -1 for scroll up, 1 for scroll down)
 		if (typeof window.lastMouseWheel !== 'undefined') {
-			state.uiScrollOffset = Math.max(0, Math.min(state.uiMaxScrollOffset, state.uiScrollOffset + window.lastMouseWheel * 15));
+			state.uiScrollOffset = Math.max(0, Math.min(state.uiMaxScrollOffset, state.uiScrollOffset + window.lastMouseWheel * 25));
 			window.lastMouseWheel = 0; // Reset after consuming
 		}
 	}
+
+	// Calculate adjusted mouse Y for scrolled content
+	const adjustedMouseY = mouseY + state.uiScrollOffset;
 
 	// Draw title (always visible)
 	fill(0);
@@ -52,64 +51,23 @@ export function drawControlPanel() {
 	push();
 	translate(0, -state.uiScrollOffset);
 
+	// Store adjusted mouse Y in state for components to use
+	state.uiAdjustedMouseY = adjustedMouseY;
+
 	currentUIY = PANEL_PADDING_TOP;
 
-	// Generation buttons (Heightmap & Cone Map)
-	currentUIY = drawGenerationButtons(contentStartX, currentUIY, panelContentWidth);
+	// Heightmap settings section
+	currentUIY = drawHeightmapSettings(contentStartX, currentUIY, panelContentWidth);
 
-	// Cone stepping run/pause button
-	drawSteppingButton(contentStartX, currentUIY, panelContentWidth);
-	currentUIY += 50;
+	// Cone map settings section
+	currentUIY = drawConeMapSettings(contentStartX, currentUIY, panelContentWidth);
 
-	// Cone mode selector
-	currentUIY = drawToggleButtonPair(
-		"Cone Mode:",
-		"Isotropic",
-		"Anisotropic",
-		params.coneMode,
-		'isotropic',
-		'anisotropic',
-		contentStartX,
-		currentUIY,
-		panelContentWidth,
-		(newMode) => {
-			params.coneMode = newMode;
-			clearConeMapAndStepping();
-			saveState();
-		}
-	);
+	// Visualization settings section
+	currentUIY = drawVisualizationSettings(contentStartX, currentUIY, panelContentWidth);
 
-	// Cone generation mode selector
-	currentUIY = drawToggleButtonPair(
-		"Generation:",
-		"Conservative",
-		"Exact Relaxed",
-		params.coneGenerationMode,
-		'conservative',
-		'exactRelaxed',
-		contentStartX,
-		currentUIY,
-		panelContentWidth,
-		(newMode) => {
-			params.coneGenerationMode = newMode;
-			clearConeMapAndStepping();
-			saveState();
-		}
-	);
-
-	// Bilinear fix checkbox
-	if (drawCheckbox("Bilinear Fix", params.applyBilinearFix, contentStartX, currentUIY)) {
-		params.applyBilinearFix = !params.applyBilinearFix;
-		clearConeMapAndStepping();
-		saveState();
-	}
-	currentUIY += 30;
-
-	// Visibility toggles (Ray, Cone Stepping, Hovered Cone, Heightmap Interpolated)
-	currentUIY = drawVisibilityToggles(contentStartX, currentUIY);
-
-	// Parameters section (sliders)
-	currentUIY = drawParametersSection(contentStartX, currentUIY, panelContentWidth);
+	// Reset button at the bottom
+	currentUIY += 20; // Add some spacing before reset button
+	currentUIY = drawResetButton(contentStartX, currentUIY, panelContentWidth);
 
 	// Store the maximum scroll offset (content height minus visible panel height)
 	// Leave some padding at the bottom for readability

@@ -12,3 +12,8 @@
 - [ ] Stepping fails when looking straight down
 - [ ] Temporal reuse
   - [ ] Distance from frustum to ray origin
+- [x] UI
+  - [x] Height Scale should not trigger regeneration
+  - [x] Split into sections
+  - [x] Reset settings button
+  - [x] Fix scroll

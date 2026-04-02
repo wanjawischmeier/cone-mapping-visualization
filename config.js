@@ -1,10 +1,4 @@
-export let params = {
-	get canvasWidth() {
-		return window.innerWidth;
-	},
-	get canvasHeight() {
-		return window.innerHeight;
-	},
+export const defaultParams = {
 	uiPanelWidth: 220,
 	heightmapResolution: 25,
 	heightmapScale: 75,
@@ -19,4 +13,14 @@ export let params = {
 	coneMode: 'anisotropic', // 'isotropic' or 'anisotropic'
 	coneGenerationMode: 'conservative', // 'conservative' or 'exactRelaxed'
 	applyBilinearFix: true, // Apply post-process bilinear fix for robust stepping
+};
+
+export let params = {
+	get canvasWidth() {
+		return window.innerWidth;
+	},
+	get canvasHeight() {
+		return window.innerHeight;
+	},
+	...defaultParams,
 };

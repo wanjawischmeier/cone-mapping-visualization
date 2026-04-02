@@ -19,7 +19,7 @@ export function drawSlider(label, value, min, max, x, y, w, callback, onRelease)
 	let thumbX = map(value, min, max, x, x + w);
 
 	// Check for interaction
-	let isHoveringSlider = mouseX > x && mouseX < x + w && mouseY > sliderY - 10 && mouseY < sliderY + 18;
+	let isHoveringSlider = mouseX > x && mouseX < x + w && state.uiAdjustedMouseY > sliderY - 10 && state.uiAdjustedMouseY < sliderY + 18;
 	let wasPressingSlider = state.draggingSlider?.[label] || false;
 
 	if (mouseIsPressed && isHoveringSlider) {

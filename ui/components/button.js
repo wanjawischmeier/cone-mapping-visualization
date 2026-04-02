@@ -1,7 +1,7 @@
 import { state } from '../../state.js';
 
 export function drawButton(label, x, y, w, h, disabled = false) {
-	let isHovering = mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h;
+	let isHovering = mouseX > x && mouseX < x + w && state.uiAdjustedMouseY > y && state.uiAdjustedMouseY < y + h;
 
 	if (disabled) {
 		fill(180);
