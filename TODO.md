@@ -11,10 +11,15 @@
   - [x] Fix: heightmap not restored, new on every page load
 - [ ] Stepping fails when looking straight down
 - [ ] Temporal reuse
-  - [ ] Distance from frustum to ray origin
+  - [x] Distance from frustum to ray origin
+  - [x] Tumbling windows
+  - [x] Show alltogether max 
 - [x] UI
   - [x] Height Scale should not trigger regeneration
   - [x] Split into sections
   - [x] Reset settings button
   - [x] Fix scroll
   - [x] Define colors in config
+  - [ ] tumbling window disabled if cone stepping disabled
+  - [ ] hide distances when hiding tumbling
+- [ ] Smooth terrain generation

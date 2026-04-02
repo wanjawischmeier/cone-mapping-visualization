@@ -41,6 +41,10 @@ export function performConeStepping() {
         t_fail_point: steppingResult.t_fail_point,
         has_hit: steppingResult.has_hit,
         maxIterationsTaken: steppingResult.stepPoints.length - 1, // Number of actual steps taken
+        tumblingWindowMaxima: steppingResult.tumblingWindowMaxima, // Rolling window maxima
+        windowMaxIndices: steppingResult.windowMaxIndices, // Index of max distance point in each window
+        globalMaxDistanceIndex: steppingResult.globalMaxDistanceIndex, // Index of global max distance point
+        globalMaxDistance: steppingResult.globalMaxDistance, // The global max distance value
     };
 }
 
@@ -91,6 +95,16 @@ function performSteppingWithTermination(
     let t_save_point = { x: rayX1, y: rayY1, cone: origSurfaceData.cone, distanceToRayOrigin: origDistanceToRayOrigin }; // Start is always safe
     let t_fail_point = null;
     let has_hit = false;
+
+    // Initialize rolling window maxima tracking
+    const windowCount = state.tumblingWindowCount;
+    const windowSize = state.tumblingWindowSize;
+    const tumblingWindowMaxima = Array(windowCount).fill(null); // Store the max distance value for each window
+    const windowOffsets = Array(windowCount).fill(0); // Track the step index when each window should be updated
+    const windowMaxIndices = Array(windowCount).fill(-1); // Index of the point with max distance in each window
+    
+    let globalMaxDistance = 0;
+    let globalMaxDistanceIndex = 0;
 
     // Fast fail if the original ray origin is literally inside the ground geometry
     const origSurfaceY = origSurfaceData.heightCanvas;
@@ -219,6 +233,28 @@ function performSteppingWithTermination(
         currentY = newY;
 
         stepPoints.push({ x: currentX, y: currentY, cone: surfaceData.cone, distanceToRayOrigin });
+
+        // Track global max distance
+        if (distanceToRayOrigin !== null && distanceToRayOrigin > globalMaxDistance) {
+            globalMaxDistance = distanceToRayOrigin;
+            globalMaxDistanceIndex = stepPoints.length - 1; // Current point index
+        }
+
+        // Update rolling window maxima (1-indexed, so step+1)
+        const stepIndex = step + 1;
+        for (let w = 0; w < windowCount; w++) {
+            // Each window is offset by (windowSize / windowCount) * w
+            const windowOffset = (windowSize / windowCount) * w;
+            const windowPhase = (stepIndex - windowOffset) % windowSize;
+            
+            // Update max when we're at the start of this window's phase
+            if (windowPhase === 0 && distanceToRayOrigin !== null) {
+                if (tumblingWindowMaxima[w] === null || distanceToRayOrigin > tumblingWindowMaxima[w]) {
+                    tumblingWindowMaxima[w] = distanceToRayOrigin;
+                    windowMaxIndices[w] = stepPoints.length - 1; // Index of max point in this window
+                }
+            }
+        }
     }
 
     return {
@@ -227,5 +263,9 @@ function performSteppingWithTermination(
         t_save_point,
         t_fail_point,
         has_hit,
+        tumblingWindowMaxima,
+        windowMaxIndices,
+        globalMaxDistanceIndex,
+        globalMaxDistance,
     };
 }

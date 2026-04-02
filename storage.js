@@ -24,6 +24,9 @@ export function saveState() {
         showConeStepping: state.uiState.showConeStepping,
         showHoveredCone: state.uiState.showHoveredCone,
         heightmapInterpolated: state.uiState.heightmapInterpolated,
+        showTumblingWindows: state.uiState.showTumblingWindows,
+        tumblingWindowSize: state.tumblingWindowSize,
+        tumblingWindowCount: state.tumblingWindowCount,
         coneMode: params.coneMode,
         coneGenerationMode: params.coneGenerationMode,
         applyBilinearFix: params.applyBilinearFix,
@@ -70,6 +73,9 @@ export function loadState() {
         if (data.showConeStepping !== undefined) state.uiState.showConeStepping = data.showConeStepping;
         if (data.showHoveredCone !== undefined) state.uiState.showHoveredCone = data.showHoveredCone;
         if (data.heightmapInterpolated !== undefined) state.uiState.heightmapInterpolated = data.heightmapInterpolated;
+        if (data.showTumblingWindows !== undefined) state.uiState.showTumblingWindows = data.showTumblingWindows;
+        if (data.tumblingWindowSize !== undefined) state.tumblingWindowSize = Math.floor(data.tumblingWindowSize);
+        if (data.tumblingWindowCount !== undefined) state.tumblingWindowCount = Math.floor(data.tumblingWindowCount);
 
         // Load ray position
         if (data.rayX1 !== undefined) state.ray.x1 = data.rayX1;

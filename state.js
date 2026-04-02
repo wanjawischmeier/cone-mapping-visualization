@@ -6,6 +6,7 @@ export class UIState {
 		this.showConeStepping = true;
 		this.showHoveredCone = false;
 		this.heightmapInterpolated = true; // true = smooth interpolated, false = nearest neighbor (stepped)
+		this.showTumblingWindows = false;
 	}
 
 	// Toggle ray visibility
@@ -28,12 +29,18 @@ export class UIState {
 		this.heightmapInterpolated = !this.heightmapInterpolated;
 	}
 
+	// Toggle tumbling windows
+	toggleTumblingWindows() {
+		this.showTumblingWindows = !this.showTumblingWindows;
+	}
+
 	// Reset to defaults
 	reset() {
 		this.showRay = true;
 		this.showConeStepping = true;
 		this.showHoveredCone = false;
 		this.heightmapInterpolated = true;
+		this.showTumblingWindows = false;
 	}
 }
 
@@ -55,6 +62,8 @@ export const state = {
 	draggingSlider: {}, // Track which sliders are being dragged
 	uiScrollOffset: 0, // Vertical scroll offset for the control panel
 	uiMaxScrollOffset: 0, // Maximum scroll offset before hitting bottom of content
+	tumblingWindowSize: 5, // Number of points in each window
+	tumblingWindowCount: 3, // Number of overlapping windows
 };
 
 // Export convenience references that point to state object properties

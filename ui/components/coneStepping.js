@@ -46,6 +46,18 @@ export function drawConeStepping(viewWidth, viewHeight) {
 		}
 	}
 
+	// Highlight the global max distance point
+	const globalMaxDistanceIndex = state.steppingData.globalMaxDistanceIndex;
+	if (globalMaxDistanceIndex >= 0 && globalMaxDistanceIndex < stepPoints.length) {
+		const globalMaxPt = stepPoints[globalMaxDistanceIndex];
+		if (globalMaxPt && globalMaxPt.x >= boxMinX && globalMaxPt.x <= boxMaxX && globalMaxPt.y >= boxMinY && globalMaxPt.y <= boxMaxY) {
+			// Draw a small bright dot in the center
+			fill(255, 0, 0, 255);
+			noStroke();
+			circle(globalMaxPt.x, globalMaxPt.y, 4);
+		}
+	}
+
 	// Draw t_save point (last known safe position) in green with its cone
 	if (state.steppingData.t_save_point) {
 		const pt = state.steppingData.t_save_point;

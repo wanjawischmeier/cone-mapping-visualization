@@ -7,6 +7,7 @@ import { drawHeightmapProfile, drawHeightmapPoints } from '../components/heightm
 import { drawIterationSlider } from '../components/iterationSlider.js';
 import { drawConeStepping, drawLastSteppingState } from '../components/coneStepping.js';
 import { drawHoveredCone, drawNextStepPoint, drawRay, clipLineToBox, drawDottedLine } from '../components/shapes.js';
+import { drawTumblingWindows } from '../components/tumblingWindows.js';
 import { colors } from '../../config.js';
 
 export function drawHeightmapVisualization() {
@@ -35,6 +36,9 @@ export function drawHeightmapVisualization() {
 
 	// Draw height field points at bottom with color corresponding to height
 	drawHeightmapPoints(pointSpacing, viewHeight);
+
+	// Draw tumbling windows if enabled
+	drawTumblingWindows(pointSpacing, viewHeight);
 
 	// Update hovered index based on closest x-wise point in entire visualization
 	updateHoveredIndexFromMouse(pointSpacing, viewHeight, viewWidth);
