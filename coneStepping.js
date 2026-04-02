@@ -2,7 +2,7 @@ import { params } from "./config.js";
 import { state } from "./state.js";
 import { Ray } from "./ray.js";
 import { getHeightAndCone } from "./helpers/sampling.js";
-import { computeConservativeMinStepToCellBorder } from "./helpers/geometry.js";
+import { computeConservativeMinStepToCellBorder, getClosestPointOnCone } from "./helpers/geometry.js";
 
 // Check if stepping should run
 function shouldPerformStepping() {
@@ -58,11 +58,37 @@ function performSteppingWithTermination(
         viewHeight_canvas,
         scaleFactor,
     );
-    const stepPoints = [{ x: rayX1, y: rayY1, cone: origSurfaceData.cone }];
+    
+    // Compute distance from ray origin to cone at origin
+    const { pixelLeftSlope: origSlopesLeft, pixelRightSlope: origSlopesRight } = origSurfaceData.cone.getScreenSlopes(
+        pointSpacing,
+        viewHeight_canvas,
+    );
+    // Check if global ray orig is inside this cone
+    const globalRay = new Ray(state.ray.x1, state.ray.y1, state.ray.x2, state.ray.y2);
+    const globalIntersection = globalRay.computeRayStep(
+        rayX1,
+        origSurfaceData.heightCanvas,
+        origSlopesLeft,
+        origSlopesRight,
+        viewHeight_canvas,
+    );
+
+    const origDistanceToRayOrigin = globalIntersection ? getClosestPointOnCone(
+        rayX1,
+        origSurfaceData.heightCanvas,
+        origSlopesLeft,
+        origSlopesRight,
+        rayX1,
+        rayY1,
+        viewHeight_canvas
+    ).distance : null;
+    
+    const stepPoints = [{ x: rayX1, y: rayY1, cone: origSurfaceData.cone, distanceToRayOrigin: origDistanceToRayOrigin }];
 
     let currentX = rayX1;
     let currentY = rayY1;
-    let t_save_point = { x: rayX1, y: rayY1, cone: origSurfaceData.cone }; // Start is always safe
+    let t_save_point = { x: rayX1, y: rayY1, cone: origSurfaceData.cone, distanceToRayOrigin: origDistanceToRayOrigin }; // Start is always safe
     let t_fail_point = null;
     let has_hit = false;
 
@@ -72,8 +98,8 @@ function performSteppingWithTermination(
         return {
             stepPoints,
             currentConeIndex: -1,
-            t_save_point: { x: currentX, y: currentY, cone: origSurfaceData.cone },
-            t_fail_point: { x: currentX, y: currentY, cone: origSurfaceData.cone },
+            t_save_point: { x: currentX, y: currentY, cone: origSurfaceData.cone, distanceToRayOrigin: origDistanceToRayOrigin },
+            t_fail_point: { x: currentX, y: currentY, cone: origSurfaceData.cone, distanceToRayOrigin: origDistanceToRayOrigin },
             has_hit: true,
         };
     }
@@ -162,12 +188,37 @@ function performSteppingWithTermination(
         }
 
         // Successful step - update safe position and current location
-        // We already computed the surface data at this new position above, no need to re-compute
+        
+        // Check if global ray origin is inside this NEW cone we just stepped to
+        const { pixelLeftSlope: newLeftSlope, pixelRightSlope: newRightSlope } = surfaceData.cone.getScreenSlopes(
+            pointSpacing,
+            viewHeight_canvas,
+        );
+        const globalRay = new Ray(state.ray.x1, state.ray.y1, state.ray.x2, state.ray.y2);
+        const globalIntersection = globalRay.computeRayStep(
+            newX,
+            surfaceData.heightCanvas,
+            newLeftSlope,
+            newRightSlope,
+            viewHeight_canvas,
+        );
+
+        // Compute distance from global ray origin to this NEW cone only if origin is inside
+        const distanceToRayOrigin = globalIntersection ? getClosestPointOnCone(
+            newX,
+            surfaceData.heightCanvas,
+            newLeftSlope,
+            newRightSlope,
+            state.ray.x1,
+            state.ray.y1,
+            viewHeight_canvas
+        ).distance : null;
+        
         t_save_point = { x: newX, y: newY, cone: surfaceData.cone };
         currentX = newX;
         currentY = newY;
 
-        stepPoints.push({ x: currentX, y: currentY, cone: surfaceData.cone });
+        stepPoints.push({ x: currentX, y: currentY, cone: surfaceData.cone, distanceToRayOrigin });
     }
 
     return {

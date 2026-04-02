@@ -22,10 +22,27 @@ export function drawConeStepping(viewWidth, viewHeight) {
 		const pt = stepPoints[i];
 		// Only draw if within bounds
 		if (pt.x >= boxMinX && pt.x <= boxMaxX && pt.y >= boxMinY && pt.y <= boxMaxY) {
-			const stepColor = [150, 150, 255]; // Blue for all points
-			fill(...stepColor);
-			noStroke();
-			circle(pt.x, pt.y, 6);
+			const stepColor = colors.coneStepPoint; // Blue for all points
+			const baseRadius = 8; // Fixed base radius
+			
+			if (pt.distanceToRayOrigin !== undefined && pt.distanceToRayOrigin !== null) {
+				// Ray origin is inside this cone - show two circles
+				// Outer circle scaled by distance at reduced opacity
+				const scaledRadius = baseRadius + Math.max(2, Math.min(12, pt.distanceToRayOrigin / 20));
+				fill(...stepColor.slice(0, 3), 100); // Reduced opacity for outer circle
+				noStroke();
+				circle(pt.x, pt.y, scaledRadius * 2);
+				
+				// Inner circle with fixed radius at full opacity
+				fill(...stepColor.slice(0, 3), 255);
+				noStroke();
+				circle(pt.x, pt.y, baseRadius);
+			} else {
+				// Ray origin is outside this cone - show single circle with low opacity
+				fill(...stepColor.slice(0, 3), 100);
+				noStroke();
+				circle(pt.x, pt.y, baseRadius);
+			}
 		}
 	}
 

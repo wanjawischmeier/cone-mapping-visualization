@@ -164,7 +164,6 @@ function generateConeMapExactRelaxed() {
 
 // Apply bilinear fix from robust cone stepping paper
 // Each slope becomes the steepest (maximum value) of itself and its 2 immediate neighbors
-// Must capture original slopes first to avoid propagating values across the map
 function applyBilinearFix() {
 	const n = state.coneMap.length;
 	if (n < 2) return; // No neighbors to check
