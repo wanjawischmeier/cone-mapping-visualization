@@ -10,12 +10,13 @@ import { saveState } from '../../storage.js';
 import { generateRandomHeightmap } from '../../heightmap.js';
 import { generateConeMap } from '../../coneMap.js';
 import { isMouseClicked } from '../inputEvents.js';
+import { colors } from '../../config.js';
 
 export function drawGenerationSettings(x, y, contentWidth) {
 	let currentY = y;
 	
 	// Section header
-	fill(0);
+	fill(colors.text);
 	noStroke();
 	textSize(12);
 	textStyle(BOLD);

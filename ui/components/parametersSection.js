@@ -3,11 +3,12 @@ import { state } from '../../state.js';
 import { drawSlider } from './slider.js';
 import { generateRandomHeightmap } from '../../heightmap.js';
 import { saveState } from '../../storage.js';
+import { colors } from '../../config.js';
 
 export function drawParametersSection(x, y, contentWidth) {
 	let currentY = y;
 	
-	fill(0);
+	fill(colors.text);
 	noStroke();
 	textSize(11);
 	textStyle(BOLD);

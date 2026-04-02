@@ -7,10 +7,11 @@ import { drawHeightmapProfile, drawHeightmapPoints } from '../components/heightm
 import { drawIterationSlider } from '../components/iterationSlider.js';
 import { drawConeStepping, drawLastSteppingState } from '../components/coneStepping.js';
 import { drawHoveredCone, drawNextStepPoint, drawRay, clipLineToBox, drawDottedLine } from '../components/shapes.js';
+import { colors } from '../../config.js';
 
 export function drawHeightmapVisualization() {
 	if (state.heightmap.length === 0) {
-		fill(150);
+		fill(colors.heightmapStepFill);
 		textAlign(CENTER, CENTER);
 		text("Generate a heightmap to start", params.canvasWidth / 2 - params.uiPanelWidth, params.canvasHeight / 2);
 		return;
@@ -21,8 +22,8 @@ export function drawHeightmapVisualization() {
 	const pointSpacing = viewWidth / (state.heightmap.length - 1);
 
 	// Draw background for visualization area
-	fill(255);
-	stroke(200);
+	fill(colors.heightmapLinesFill);
+	stroke(colors.heightmapLinesStroke);
 	strokeWeight(1);
 	rect(params.sideViewPadding, params.sideViewPadding, viewWidth, viewHeight);
 

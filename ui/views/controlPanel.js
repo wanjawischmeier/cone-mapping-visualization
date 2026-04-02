@@ -1,5 +1,6 @@
 import { params } from '../../../config.js';
 import { state } from '../../../state.js';
+import { colors } from '../../../config.js';
 import { drawHeightmapSettings } from '../components/heightmapSettings.js';
 import { drawConeMapSettings } from '../components/coneMapSettings.js';
 import { drawVisualizationSettings } from '../components/visualizationSettings.js';
@@ -20,8 +21,8 @@ export function drawControlPanel() {
 	const panelContentWidth = params.uiPanelWidth - (PANEL_PADDING_X * 2);
 	const contentStartX = uiPanelX + PANEL_PADDING_X;
 
-	fill(220);
-	stroke(100);
+	fill(colors.panelBackground);
+	stroke(colors.panelBorder);
 	strokeWeight(1);
 	rect(uiPanelX, uiPanelY, params.uiPanelWidth, params.canvasHeight);
 
@@ -39,7 +40,7 @@ export function drawControlPanel() {
 	const adjustedMouseY = mouseY + state.uiScrollOffset;
 
 	// Draw title (always visible)
-	fill(0);
+	fill(colors.text);
 	noStroke();
 	textSize(14);
 	textAlign(LEFT);

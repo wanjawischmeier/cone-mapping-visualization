@@ -1,19 +1,20 @@
 import { state } from '../../state.js';
+import { colors } from '../../config.js';
 
 export function drawButton(label, x, y, w, h, disabled = false) {
 	let isHovering = mouseX > x && mouseX < x + w && state.uiAdjustedMouseY > y && state.uiAdjustedMouseY < y + h;
 
 	if (disabled) {
-		fill(180);
-		stroke(120);
+		fill(colors.buttonDisabledBackground);
+		stroke(colors.buttonDisabledBorder);
 	} else {
-		fill(isHovering ? 100 : 150);
-		stroke(50);
+		fill(isHovering ? colors.buttonHoverBackground : colors.buttonDefaultBackground);
+		stroke(colors.buttonBorder);
 	}
 	strokeWeight(2);
 	rect(x, y, w, h);
 
-	fill(disabled ? 150 : 255);
+	fill(disabled ? colors.buttonTextDisabled : colors.buttonText);
 	noStroke();
 	textSize(12);
 	textAlign(CENTER, CENTER);

@@ -1,4 +1,5 @@
 import { isMouseClicked } from "../inputEvents.js";
+import { colors } from "../../config.js";
 
 export function drawCheckbox(label, isChecked, x, y, disabled = false) {
 	const boxSize = 16;
@@ -6,18 +7,18 @@ export function drawCheckbox(label, isChecked, x, y, disabled = false) {
 
 	// Draw checkbox
 	if (disabled) {
-		fill(200);
-		stroke(150);
+		fill(colors.checkboxDisabledBackground);
+		stroke(colors.checkboxDisabledBorder);
 	} else {
-		fill(isChecked ? 100 : 255);
-		stroke(50);
+		fill(isChecked ? colors.checkboxCheckedBackground : colors.checkboxUncheckedBackground);
+		stroke(colors.checkboxBorder);
 	}
 	strokeWeight(1);
 	rect(x, y, boxSize, boxSize);
 
 	// Draw checkmark if checked
 	if (isChecked && !disabled) {
-		stroke(255);
+		stroke(colors.checkboxCheckmark);
 		strokeWeight(2);
 		noFill();
 		line(x + 4, y + 8, x + 7, y + 11);
@@ -25,7 +26,7 @@ export function drawCheckbox(label, isChecked, x, y, disabled = false) {
 	}
 
 	// Draw label
-	fill(disabled ? 150 : 0);
+	fill(disabled ? colors.textDisabled : colors.text);
 	noStroke();
 	textSize(11);
 	textAlign(LEFT, CENTER);

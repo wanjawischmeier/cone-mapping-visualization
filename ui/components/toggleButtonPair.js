@@ -1,7 +1,8 @@
 import { isMouseClicked } from '../inputEvents.js';
+import { colors } from '../../config.js';
 
 export function drawToggleButtonPair(sectionLabel, buttonLabelA, buttonLabelB, currentValue, valueA, valueB, x, y, contentWidth, onChangeCallback) {
-	fill(0);
+	fill(colors.text);
 	noStroke();
 	textSize(10);
 	textAlign(LEFT);
@@ -14,11 +15,11 @@ export function drawToggleButtonPair(sectionLabel, buttonLabelA, buttonLabelB, c
 	const isSelectedA = currentValue === valueA;
 	
 	// Button A
-	fill(isSelectedA ? 100 : 150);
-	stroke(50);
+	fill(isSelectedA ? colors.buttonHoverBackground : colors.buttonDefaultBackground);
+	stroke(colors.buttonBorder);
 	strokeWeight(1);
 	rect(x, currentY, buttonWidth, 20);
-	fill(255);
+	fill(colors.buttonText);
 	noStroke();
 	textSize(9);
 	textAlign(CENTER, CENTER);
@@ -29,11 +30,11 @@ export function drawToggleButtonPair(sectionLabel, buttonLabelA, buttonLabelB, c
 	}
 	
 	// Button B
-	fill(!isSelectedA ? 100 : 150);
-	stroke(50);
+	fill(!isSelectedA ? colors.buttonHoverBackground : colors.buttonDefaultBackground);
+	stroke(colors.buttonBorder);
 	strokeWeight(1);
 	rect(x + buttonWidth + buttonGap, currentY, buttonWidth, 20);
-	fill(255);
+	fill(colors.buttonText);
 	noStroke();
 	textSize(9);
 	textAlign(CENTER, CENTER);

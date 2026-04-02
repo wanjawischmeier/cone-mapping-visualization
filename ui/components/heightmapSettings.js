@@ -1,14 +1,17 @@
 import { params } from '../../config.js';
+import { state } from '../../state.js';
+import { drawCheckbox } from './checkbox.js';
 import { drawSlider } from './slider.js';
 import { drawButton } from './button.js';
 import { generateRandomHeightmap } from '../../heightmap.js';
 import { isMouseClicked } from '../inputEvents.js';
+import { colors } from '../../config.js';
 
 export function drawHeightmapSettings(x, y, contentWidth) {
 	let currentY = y;
 	
 	// Section header
-	fill(0);
+	fill(colors.text);
 	noStroke();
 	textSize(12);
 	textStyle(BOLD);

@@ -1,4 +1,5 @@
 import { params } from '../../config.js';
+import { colors } from '../../config.js';
 import { coneMap, state } from '../../state.js';
 import { getHeightAndCone } from '../../helpers/sampling.js';
 
@@ -48,7 +49,7 @@ export function drawHoveredCone(pointSpacing, viewHeight, viewWidth, rayOriginIn
 
 	// Determine opacity based on whether ray origin is inside cone
 	const opacity = rayOriginInsideCone ? 255 : 75;
-	const coneColor = [255, 165, 100, opacity]; // Orange
+	const coneColor = [colors.coneHovered[0], colors.coneHovered[1], colors.coneHovered[2], opacity];
 
 	// Left cone edge: passes through apex with direction (-1, -leftSlopePixels)
 	const leftEdge = clipLineToBox(x, y, -1, -pixelLeftSlope, boxMinX, boxMinY, boxMaxX, boxMaxY);

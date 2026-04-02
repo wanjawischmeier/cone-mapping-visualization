@@ -1,5 +1,6 @@
 import { params } from '../../config.js';
 import { state } from '../../state.js';
+import { colors } from '../../config.js';
 
 export function drawIterationSlider() {
 	const sliderY = 10;
@@ -22,7 +23,7 @@ export function drawIterationSlider() {
 	}
 
 	// Draw label
-	fill(0);
+	fill(colors.text);
 	noStroke();
 	textSize(11);
 	textAlign(LEFT, CENTER);
@@ -31,8 +32,8 @@ export function drawIterationSlider() {
 	textStyle(NORMAL);
 
 	// Draw slider background
-	fill(220);
-	stroke(100);
+	fill(colors.panelBackground);
+	stroke(colors.panelBorder);
 	strokeWeight(1);
 	rect(sliderX, sliderY, sliderWidth, 20);
 
@@ -56,12 +57,12 @@ export function drawIterationSlider() {
 
 	// Draw slider thumb
 	const thumbX = displayMax > 0 ? map(state.currentIteration, 0, displayMax, sliderX, sliderX + sliderWidth) : sliderX;
-	fill(state.draggingIterationSlider ? 60 : 100);
+	fill(state.draggingIterationSlider ? colors.sliderThumb : colors.sliderBorder);
 	noStroke();
 	rect(thumbX - 5, sliderY, 10, 20);
 
 	// Draw label and value
-	fill(0);
+	fill(colors.text);
 	noStroke();
 	textSize(10);
 	textAlign(LEFT, CENTER);

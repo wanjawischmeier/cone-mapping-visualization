@@ -5,12 +5,13 @@ import { drawSlider } from './slider.js';
 import { drawButton } from './button.js';
 import { saveState } from '../../storage.js';
 import { generateRandomHeightmap } from '../../heightmap.js';
+import { colors } from '../../config.js';
 
 export function drawVisualizationSettings(x, y, contentWidth) {
 	let currentY = y;
 	
 	// Section header
-	fill(0);
+	fill(colors.text);
 	noStroke();
 	textSize(12);
 	textStyle(BOLD);

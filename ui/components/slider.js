@@ -1,8 +1,9 @@
 import { state } from '../../state.js';
+import { colors } from '../../config.js';
 
 export function drawSlider(label, value, min, max, x, y, w, callback, onRelease) {
 	// Label
-	fill(0);
+	fill(colors.text);
 	noStroke();
 	textSize(10);
 	textAlign(LEFT);
@@ -10,8 +11,8 @@ export function drawSlider(label, value, min, max, x, y, w, callback, onRelease)
 
 	// Slider background
 	let sliderY = y + 15;
-	fill(200);
-	stroke(100);
+	fill(colors.sliderBackground);
+	stroke(colors.sliderBorder);
 	strokeWeight(1);
 	rect(x, sliderY, w, 8);
 
@@ -38,12 +39,12 @@ export function drawSlider(label, value, min, max, x, y, w, callback, onRelease)
 		}
 	}
 
-	fill(100);
+	fill(colors.sliderThumb);
 	noStroke();
 	circle(thumbX, sliderY + 4, 12);
 
 	// Value display
-	fill(0);
+	fill(colors.text);
 	noStroke();
 	textSize(9);
 	textAlign(RIGHT);

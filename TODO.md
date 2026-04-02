@@ -17,3 +17,4 @@
   - [x] Split into sections
   - [x] Reset settings button
   - [x] Fix scroll
+  - [x] Define colors in config
