@@ -2,6 +2,7 @@ import { params } from '../config.js';
 import { state } from '../state.js';
 import { Ray } from '../ray.js';
 import { getHeightAndCone } from '../coneStepping.js';
+import { getClosestPointOnCone } from '../geometry.js';
 import { drawHeightmapProfile, drawHeightmapPoints } from './components/heightmap.js';
 import { drawIterationSlider } from './components/iterationSlider.js';
 import { drawConeStepping, drawLastSteppingState } from './components/coneStepping.js';
@@ -85,6 +86,10 @@ export function drawHeightmapVisualization() {
 					}
 					
 					drawNextStepPoint(nextStepPoint);
+					
+					// Draw dotted line from ray origin to the closest point on the cone
+					const closestOnCone = getClosestPointOnCone(coneX, coneY, pixelLeftSlope, pixelRightSlope, state.ray.x1, state.ray.y1, viewHeight);
+					drawDottedLine(state.ray.x1, state.ray.y1, closestOnCone.point.x, closestOnCone.point.y, [255, 165, 100, 200]);
 				}
 			}
 		}
