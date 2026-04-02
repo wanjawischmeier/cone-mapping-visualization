@@ -1,0 +1,9 @@
+// jsconfig.json
+{
+    "compilerOptions": {
+        "target": "ES2020",
+        "module": "es2015",
+        "allowSyntheticDefaultImports": true
+    },
+    "include": ["**/*.js"]
+}

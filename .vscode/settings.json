@@ -1,0 +1,4 @@
+{
+    "js/ts.tsserver.useSyntaxServer": "auto",
+    "js/ts.tsserver.tracing.enabled": true
+}

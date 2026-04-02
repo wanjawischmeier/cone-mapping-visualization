@@ -4,15 +4,9 @@ import { generateRandomHeightmap } from '../heightmap.js';
 import { generateConeMap, clearConeMapAndStepping } from '../coneMap.js';
 import { drawButton } from './components/button.js';
 import { drawSlider } from './components/slider.js';
+import { drawCheckbox } from './components/checkbox.js'
 import { saveState } from '../storage.js';
-
-// Helper: Detect if mouse clicked (transition from not pressed to pressed)
-function isMouseClicked(x, y, w, h) {
-	const isHovering = mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h;
-	const wasPressed = state.prevMousePressed;
-	const isPressed = mouseIsPressed;
-	return isHovering && isPressed && !wasPressed;
-}
+import { isMouseClicked } from './inputEvents.js';
 
 export function createUIPanel() {
 	// This is handled in drawUIPanel for dynamic layout
@@ -308,42 +302,4 @@ export function drawUIPanel() {
 
 	// End scrollable section
 	pop();
-}
-
-
-
-function drawCheckbox(label, isChecked, x, y, disabled = false) {
-	const boxSize = 16;
-	const labelX = x + boxSize + 10;
-
-	// Draw checkbox
-	if (disabled) {
-		fill(200);
-		stroke(150);
-	} else {
-		fill(isChecked ? 100 : 255);
-		stroke(50);
-	}
-	strokeWeight(1);
-	rect(x, y, boxSize, boxSize);
-
-	// Draw checkmark if checked
-	if (isChecked && !disabled) {
-		stroke(255);
-		strokeWeight(2);
-		noFill();
-		line(x + 4, y + 8, x + 7, y + 11);
-		line(x + 7, y + 11, x + 12, y + 6);
-	}
-
-	// Draw label
-	fill(disabled ? 150 : 0);
-	noStroke();
-	textSize(11);
-	textAlign(LEFT, CENTER);
-	textStyle(NORMAL);
-	text(label, labelX, y + boxSize / 2);
-
-	// Check for click (only if not disabled)
-	return !disabled && isMouseClicked(x, y, boxSize, boxSize);
 }

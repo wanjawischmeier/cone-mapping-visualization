@@ -1,8 +1,8 @@
 import { params } from '../config.js';
 import { state } from '../state.js';
 import { Ray } from '../ray.js';
-import { getHeightAndCone } from '../coneStepping.js';
-import { getClosestPointOnCone } from '../geometry.js';
+import { getHeightAndCone } from '../helpers/sampling.js';
+import { getClosestPointOnCone } from '../helpers/geometry.js';
 import { drawHeightmapProfile, drawHeightmapPoints } from './components/heightmap.js';
 import { drawIterationSlider } from './components/iterationSlider.js';
 import { drawConeStepping, drawLastSteppingState } from './components/coneStepping.js';

@@ -1,6 +1,6 @@
 import { params } from '../../config.js';
 import { coneMap, state } from '../../state.js';
-import { getHeightAndCone } from '../../coneStepping.js';
+import { getHeightAndCone } from '../../helpers/sampling.js';
 
 export function drawHoveredCone(pointSpacing, viewHeight, viewWidth, rayOriginInsideCone = true) {
 	if (state.hoveredIndex < 0 || state.hoveredIndex >= coneMap.length) return;

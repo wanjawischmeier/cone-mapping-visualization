@@ -1,5 +1,3 @@
-import { params } from './config.js';
-
 export class Ray {
 	constructor(x1 = 150, y1 = 100, x2 = 300, y2 = 400) {
 		this.x1 = x1;

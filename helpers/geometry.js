@@ -1,6 +1,6 @@
-// Geometric helper functions for ray-cone intersection and distance calculations
+import { params } from '../config.js';
 
-// Helper: Calculate closest point on a cone edge to a point
+// Calculate closest point on a cone edge to a point
 // edge is defined by a start point (apexX, apexY) and a direction (dx, dy)
 // Returns {x, y} of the closest point on the edge
 function getClosestPointOnEdge(apexX, apexY, edgeDx, edgeDy, pointX, pointY, maxDistance) {
@@ -48,4 +48,24 @@ export function getClosestPointOnCone(coneX, coneY, pixelLeftSlope, pixelRightSl
 	}
 
 	return { distance: minDist, point: closestPoint };
+}
+
+// Compute distance along the ray to the next cell boundary (for conservative step mapping)
+export function computeConservativeMinStepToCellBorder(currentX, rayUx, pointSpacing) {
+    if (Math.abs(rayUx) < 1e-6) return 1e-5; // Vertical ray, small epsilon
+    
+    const localX = currentX - params.sideViewPadding;
+    const floatIndex = localX / pointSpacing;
+    
+    let targetIndex;
+    if (rayUx > 0) {
+        targetIndex = Math.floor(floatIndex + 1e-4) + 1;
+    } else {
+        targetIndex = Math.ceil(floatIndex - 1e-4) - 1;
+    }
+    
+    const targetX = params.sideViewPadding + targetIndex * pointSpacing;
+    const distX = targetX - currentX;
+    
+    return Math.max(0, distX / rayUx) + 1e-5;
 }
