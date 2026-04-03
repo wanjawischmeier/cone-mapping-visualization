@@ -24,7 +24,7 @@
   - [x] hide distances when hiding tumbling
   - [x] Hovered cone only within view y
   - [ ] Clip tumbling windows to visualization area
-  - [ ] Fix hide tumbling windows if disabled indirectly
+  - [x] Fix hide tumbling windows if disabled indirectly
   - [ ] Legend
 - [x] Smooth terrain generation
 - [x] Binary sorting

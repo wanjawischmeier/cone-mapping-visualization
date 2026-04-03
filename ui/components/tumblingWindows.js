@@ -4,7 +4,7 @@ import { colors } from '../../config.js';
 import { clipLineToBox } from './shapes.js';
 
 export function drawTumblingWindows(pointSpacing, viewHeight) {
-	if (!state.uiState.showTumblingWindows) {
+	if (!state.uiState.showTumblingWindows || !state.uiState.showConeStepping) {
 		return;
 	}
 	if (!state.steppingData || !state.steppingData.stepPoints.length) {
