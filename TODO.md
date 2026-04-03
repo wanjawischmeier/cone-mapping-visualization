@@ -22,4 +22,5 @@
   - [x] Define colors in config
   - [ ] tumbling window disabled if cone stepping disabled
   - [ ] hide distances when hiding tumbling
+  - [ ] Hovered cone only within view y
 - [ ] Smooth terrain generation
