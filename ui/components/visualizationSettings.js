@@ -87,6 +87,23 @@ export function drawVisualizationSettings(x, y, contentWidth) {
 	}
 	currentY += 20;
 	
+	// Toggle Binary Search refinement (disabled if no cone stepping)
+	const binarySearchDisabled = coneSteppingDisabled || !state.uiState.showConeStepping;
+	if (drawCheckbox("Binary Search Refinement", state.uiState.showBinarySearch, x, currentY, binarySearchDisabled)) {
+		state.uiState.toggleBinarySearch();
+		saveState();
+	}
+	currentY += 30;
+	
+	// Slider for binary search steps (only shown if enabled)
+	if (!binarySearchDisabled && state.uiState.showBinarySearch) {
+		currentY = drawSlider("Binary Search Steps:", params.binarySearchSteps, 1, 20, x, currentY, contentWidth, (val) => {
+			params.binarySearchSteps = Math.floor(val);
+			saveState();
+		});
+	}
+	currentY += 20;
+	
 	// Sliders for visualization parameters
 	textSize(10);
 	

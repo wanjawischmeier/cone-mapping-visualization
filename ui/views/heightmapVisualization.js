@@ -6,6 +6,7 @@ import { getClosestPointOnCone } from '../../helpers/geometry.js';
 import { drawHeightmapProfile, drawHeightmapPoints } from '../components/heightmap.js';
 import { drawIterationSlider } from '../components/iterationSlider.js';
 import { drawConeStepping, drawLastSteppingState } from '../components/coneStepping.js';
+import { drawBinarySearchVisualization } from '../components/coneBinarySearchVisualization.js';
 import { drawHoveredCone, drawNextStepPoint, drawRay, clipLineToBox, drawDottedLine } from '../components/shapes.js';
 import { drawTumblingWindows } from '../components/tumblingWindows.js';
 import { colors } from '../../config.js';
@@ -54,6 +55,9 @@ export function drawHeightmapVisualization() {
 			} else {
 				drawLastSteppingState(viewWidth, viewHeight);
 			}
+			
+			// Draw binary search visualization if enabled
+			drawBinarySearchVisualization(pointSpacing, viewHeight);
 		}
 	}
 

@@ -3,6 +3,7 @@ import { state } from "./state.js";
 import { Ray } from "./ray.js";
 import { getHeightAndCone } from "./helpers/sampling.js";
 import { computeConservativeMinStepToCellBorder, getClosestPointOnCone } from "./helpers/geometry.js";
+import { performBinarySearch } from "./coneBinarySearch.js";
 
 // Check if stepping should run
 function shouldPerformStepping() {
@@ -46,6 +47,16 @@ export function performConeStepping() {
         globalMaxDistanceIndex: steppingResult.globalMaxDistanceIndex, // Index of global max distance point
         globalMaxDistance: steppingResult.globalMaxDistance, // The global max distance value
     };
+
+    // Perform binary search if enabled
+    if (state.uiState.showBinarySearch) {
+        const binarySearchResult = performBinarySearch();
+        if (binarySearchResult) {
+            state.binarySearchData = binarySearchResult;
+        }
+    } else {
+        state.binarySearchData = { binarySearchSteps: [], finalSurfacePoint: null };
+    }
 }
 
 // Perform stepping with proper termination at first surface hit

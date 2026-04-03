@@ -7,6 +7,7 @@ export class UIState {
 		this.showHoveredCone = false;
 		this.heightmapInterpolated = true; // true = smooth interpolated, false = nearest neighbor (stepped)
 		this.showTumblingWindows = false;
+		this.showBinarySearch = false;
 	}
 
 	// Toggle ray visibility
@@ -34,6 +35,11 @@ export class UIState {
 		this.showTumblingWindows = !this.showTumblingWindows;
 	}
 
+	// Toggle binary search
+	toggleBinarySearch() {
+		this.showBinarySearch = !this.showBinarySearch;
+	}
+
 	// Reset to defaults
 	reset() {
 		this.showRay = true;
@@ -41,6 +47,7 @@ export class UIState {
 		this.showHoveredCone = false;
 		this.heightmapInterpolated = true;
 		this.showTumblingWindows = false;
+		this.showBinarySearch = false;
 	}
 }
 
@@ -58,6 +65,7 @@ export const state = {
 	steppingData: { stepPoints: [], currentConeIndex: -1, pointSpacing: 0, t_save_point: null, t_fail_point: null, has_hit: false }, // Data from cone stepping algorithm
 	steppingRunning: false, // Whether cone stepping is actively running
 	lastSteppingData: { stepPoints: [], currentConeIndex: -1, pointSpacing: 0, t_save_point: null, t_fail_point: null, has_hit: false }, // Last stepping state when paused
+	binarySearchData: { binarySearchSteps: [], finalSurfacePoint: null }, // Data from binary search refinement
 	lastRay: { x1: 150, y1: 100, x2: 300, y2: 400 }, // Last ray position when paused
 	draggingSlider: {}, // Track which sliders are being dragged
 	uiScrollOffset: 0, // Vertical scroll offset for the control panel

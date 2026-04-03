@@ -12,6 +12,7 @@ export function saveState() {
         pointSize: params.pointSize,
         lineWeight: params.lineWeight,
         rayIterations: params.rayIterations,
+        binarySearchSteps: params.binarySearchSteps,
         heightmapSlopeStart: params.heightmapSlopeStart,
         heightmapSlopeEnd: params.heightmapSlopeEnd,
         heightmapNoisePower: params.heightmapNoisePower,
@@ -26,6 +27,7 @@ export function saveState() {
         showHoveredCone: state.uiState.showHoveredCone,
         heightmapInterpolated: state.uiState.heightmapInterpolated,
         showTumblingWindows: state.uiState.showTumblingWindows,
+        showBinarySearch: state.uiState.showBinarySearch,
         tumblingWindowSize: state.tumblingWindowSize,
         tumblingWindowCount: state.tumblingWindowCount,
         coneMode: params.coneMode,
@@ -56,6 +58,7 @@ export function loadState() {
         if (data.pointSize !== undefined) params.pointSize = data.pointSize;
         if (data.lineWeight !== undefined) params.lineWeight = data.lineWeight;
         if (data.rayIterations !== undefined) params.rayIterations = Math.floor(data.rayIterations);
+        if (data.binarySearchSteps !== undefined) params.binarySearchSteps = Math.floor(data.binarySearchSteps);
         if (data.heightmapSlopeStart !== undefined) params.heightmapSlopeStart = data.heightmapSlopeStart;
         if (data.heightmapSlopeEnd !== undefined) params.heightmapSlopeEnd = data.heightmapSlopeEnd;
         if (data.heightmapNoisePower !== undefined) params.heightmapNoisePower = data.heightmapNoisePower;
@@ -76,6 +79,7 @@ export function loadState() {
         if (data.showHoveredCone !== undefined) state.uiState.showHoveredCone = data.showHoveredCone;
         if (data.heightmapInterpolated !== undefined) state.uiState.heightmapInterpolated = data.heightmapInterpolated;
         if (data.showTumblingWindows !== undefined) state.uiState.showTumblingWindows = data.showTumblingWindows;
+        if (data.showBinarySearch !== undefined) state.uiState.showBinarySearch = data.showBinarySearch;
         if (data.tumblingWindowSize !== undefined) state.tumblingWindowSize = Math.floor(data.tumblingWindowSize);
         if (data.tumblingWindowCount !== undefined) state.tumblingWindowCount = Math.floor(data.tumblingWindowCount);
 

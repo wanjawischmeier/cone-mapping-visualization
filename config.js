@@ -7,6 +7,7 @@ export const defaultParams = {
 	sideViewPadding: 50,
 	coneColorIntensity: 0.5,
 	rayIterations: 10,
+	binarySearchSteps: 5,
 	heightmapSlopeStart: 0.7,
 	heightmapSlopeEnd: 0.0,
 	heightmapNoisePower: 0.3,
