@@ -84,22 +84,20 @@ export function drawTumblingWindows(pointSpacing, viewHeight) {
 				// Stack windows upwards from the bottom: window 0 at baseY, window 1 above it, etc
 				const windowY = baseY - (n * lineHeight);
 				
-				stroke(100, 120, 255, 200); // More opaque blue
-				strokeWeight(3); // Thicker line
-				line(startPt.x, windowY, endPt.x, windowY);
-				
-				// Add markers at start and end
-				fill(100, 120, 255, 255);
-				noStroke();
-				circle(startPt.x, windowY, 6);
+			stroke(...colors.tumblingWindowLine);
+			strokeWeight(3); // Thicker line
+			line(startPt.x, windowY, endPt.x, windowY);
+			
+			// Add markers at start and end
+			fill(...colors.tumblingWindowMarker);
 				circle(endPt.x, windowY, 6);
 				
 				// Mark the point with max distance in this window
 				const windowMaxIdx = windowMaxIndices[n];
 				if (windowMaxIdx >= windowStartIdx && windowMaxIdx <= actualEndIdx && windowMaxIdx >= 0 && stepPoints[windowMaxIdx]) {
 					const maxPt = stepPoints[windowMaxIdx];
-					// Draw a small red circle on the line at the max point's x position
-					fill(255, 100, 100);
+				// Draw a small light red circle on the line at the max point's x position
+				fill(...colors.tumblingWindowMax);
 					noStroke();
 					circle(maxPt.x, windowY, 4);
 				}
@@ -108,11 +106,11 @@ export function drawTumblingWindows(pointSpacing, viewHeight) {
 				if (globalMaxDistanceIndex >= windowStartIdx && globalMaxDistanceIndex <= actualEndIdx && globalMaxDistanceIndex >= 0 && stepPoints[globalMaxDistanceIndex]) {
 					const globalMaxPt = stepPoints[globalMaxDistanceIndex];
 					// Draw a larger circle with a cross at the global max position
-					fill(255, 0, 0);
-					noStroke();
-					circle(globalMaxPt.x, windowY, 8);
-					// Draw a cross in the center
-					stroke(255, 0, 0);
+				fill(...colors.tumblingGlobalMax);
+				noStroke();
+				circle(globalMaxPt.x, windowY, 8);
+				// Draw a cross in the center
+				stroke(...colors.tumblingGlobalMaxStroke);
 					strokeWeight(2);
 					line(globalMaxPt.x - 4, windowY, globalMaxPt.x + 4, windowY);
 					line(globalMaxPt.x, windowY - 4, globalMaxPt.x, windowY + 4);
@@ -127,13 +125,13 @@ export function drawTumblingWindows(pointSpacing, viewHeight) {
 							const allTogetherMaxPt = stepPoints[globalMaxDistanceIndex];
 							// Draw a thick yellow outline circle around this point
 							noFill();
-							stroke(255, 255, 0); // Yellow outline
+							stroke(...colors.tumblingAllTogetherMax);
 							strokeWeight(3);
 							circle(allTogetherMaxPt.x, windowY, 12);
 							
 							// Draw the cone of the all-together max point
 							if (allTogetherMaxPt.cone) {
-								drawConeAtPosition(allTogetherMaxPt.x, allTogetherMaxPt.cone, pointSpacing, viewHeight, [255, 255, 0, 150], boxMinX, boxMinY, boxMaxX, boxMaxY);
+								drawConeAtPosition(allTogetherMaxPt.x, allTogetherMaxPt.cone, pointSpacing, viewHeight, colors.tumblingAllTogetherMaxCone, boxMinX, boxMinY, boxMaxX, boxMaxY);
 							}
 						}
 					}

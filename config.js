@@ -71,6 +71,15 @@ export const colors = {
 	coneDefault: [100, 150, 255],			// Blue
 	coneHovered: [255, 165, 100],			// Orange
 	
+	// Tumbling Windows visualization
+	tumblingWindowLine: [100, 120, 255, 200],		// Blue line
+	tumblingWindowMarker: [100, 120, 255, 255],	// Blue end markers
+	tumblingWindowMax: [255, 100, 100],				// Light red for window max
+	tumblingGlobalMax: [255, 0, 0],					// Red for global max
+	tumblingGlobalMaxStroke: [255, 0, 0],			// Red stroke for global max cross
+	tumblingAllTogetherMax: [255, 255, 0],			// Yellow for all-together max
+	tumblingAllTogetherMaxCone: [255, 255, 0, 150],	// Yellow semi-transparent for cone
+	
 	// Ray/Sketcher visualization (sketch2.js)
 	rayLine: [100, 200, 255],
 	rayLineSemiTransparent: [100, 200, 255, 40],

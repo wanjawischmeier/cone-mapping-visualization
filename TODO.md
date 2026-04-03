@@ -19,7 +19,7 @@
   - [x] Reset settings button
   - [x] Fix scroll
   - [x] Define colors in config
-    - [ ] Move tumbling window colors
+    - [x] Move tumbling window colors
   - [x] tumbling window disabled if cone stepping disabled
   - [x] hide distances when hiding tumbling
   - [x] Hovered cone only within view y
@@ -28,4 +28,5 @@
   - [ ] Legend
 - [x] Smooth terrain generation
 - [x] Binary sorting
+  - [ ] Add binary search steps to tumbling window
 - [ ] Error calculation
