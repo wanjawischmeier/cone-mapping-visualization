@@ -65,32 +65,27 @@ export function drawVisualizationSettings(x, y, contentWidth) {
 	}
 	currentY += 30;
 	
-	// Toggle Hovered Cone visibility (disabled if no cone map)
-	const hoveredConeDisabled = coneMap.length === 0;
-	if (drawCheckbox("Show Hovered Cone", state.uiState.showHoveredCone, x, currentY, hoveredConeDisabled)) {
-		state.uiState.toggleHoveredCone();
-		saveState();
-	}
-	currentY += 30;
-	
-	// Toggle Tumbling Windows visibility (disabled if no cone map)
-	const tumblingWindowsDisabled = coneMap.length === 0;
+	// Toggle Tumbling Windows visibility (disabled if cone stepping is disabled or not enabled)
+	const tumblingWindowsDisabled = coneSteppingDisabled || !state.uiState.showConeStepping;
 	if (drawCheckbox("Show Tumbling Windows", state.uiState.showTumblingWindows, x, currentY, tumblingWindowsDisabled)) {
 		state.uiState.toggleTumblingWindows();
 		saveState();
 	}
 	currentY += 30;
 	
-	// Sliders for tumbling windows (only enabled if checkbox is on)
-	currentY = drawSlider("Window Size:", state.tumblingWindowSize, 2, 20, x, currentY, contentWidth, (val) => {
-		state.tumblingWindowSize = Math.floor(val);
-		saveState();
-	});
+	// Sliders for tumbling windows (only shown if enabled)
+	if (!tumblingWindowsDisabled && state.uiState.showTumblingWindows) {
+		currentY = drawSlider("Window Size:", state.tumblingWindowSize, 2, 20, x, currentY, contentWidth, (val) => {
+			state.tumblingWindowSize = Math.floor(val);
+			saveState();
+		});
 
-	currentY = drawSlider("Window Count:", state.tumblingWindowCount, 1, 10, x, currentY, contentWidth, (val) => {
-		state.tumblingWindowCount = Math.floor(val);
-		saveState();
-	});
+		currentY = drawSlider("Window Count:", state.tumblingWindowCount, 1, 10, x, currentY, contentWidth, (val) => {
+			state.tumblingWindowCount = Math.floor(val);
+			saveState();
+		});
+	}
+	currentY += 20;
 	
 	// Sliders for visualization parameters
 	textSize(10);
@@ -123,6 +118,15 @@ export function drawVisualizationSettings(x, y, contentWidth) {
 			state.currentIteration = params.rayIterations - 1;
 		}
 	});
+	
+	currentY += 20;
+	
+	// Toggle Hovered Cone visibility (disabled if no cone map)
+	const hoveredConeDisabled = coneMap.length === 0;
+	if (drawCheckbox("Show Hovered Cone", state.uiState.showHoveredCone, x, currentY, hoveredConeDisabled)) {
+		state.uiState.toggleHoveredCone();
+		saveState();
+	}
 	
 	return currentY + 20;
 }

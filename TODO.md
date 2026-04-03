@@ -5,8 +5,6 @@
 - [x] Run/Pause stepping
 - [x] Clip intersection/stepping points to view area
 - [x] Auto generate heightmaps on parameter changes
-- [ ] How does interpolation work?
-- [ ] How does stepping stop work?
 - [x] Store parameters in local storage
   - [x] Fix: heightmap not restored, new on every page load
 - [ ] Stepping fails when looking straight down
@@ -14,13 +12,14 @@
   - [x] Distance from frustum to ray origin
   - [x] Tumbling windows
   - [x] Show alltogether max 
+  - [ ] Fix data not shown when paused
 - [x] UI
   - [x] Height Scale should not trigger regeneration
   - [x] Split into sections
   - [x] Reset settings button
   - [x] Fix scroll
   - [x] Define colors in config
-  - [ ] tumbling window disabled if cone stepping disabled
-  - [ ] hide distances when hiding tumbling
+  - [x] tumbling window disabled if cone stepping disabled
+  - [x] hide distances when hiding tumbling
   - [x] Hovered cone only within view y
 - [ ] Smooth terrain generation

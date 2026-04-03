@@ -26,35 +26,41 @@ export function drawConeStepping(viewWidth, viewHeight) {
 			const baseRadius = 8; // Fixed base radius
 			
 			if (pt.distanceToRayOrigin !== undefined && pt.distanceToRayOrigin !== null) {
-				// Ray origin is inside this cone - show two circles
-				// Outer circle scaled by distance at reduced opacity
-				const scaledRadius = baseRadius + Math.max(2, Math.min(12, pt.distanceToRayOrigin / 20));
-				fill(...stepColor.slice(0, 3), 100); // Reduced opacity for outer circle
-				noStroke();
-				circle(pt.x, pt.y, scaledRadius * 2);
+				// Only show outer circle if tumbling windows are enabled
+				if (state.uiState.showTumblingWindows) {
+					// Ray origin is inside this cone - show two circles
+					// Outer circle scaled by distance at reduced opacity
+					const scaledRadius = baseRadius + Math.max(2, Math.min(12, pt.distanceToRayOrigin / 20));
+					fill(...stepColor.slice(0, 3), 100); // Reduced opacity for outer circle
+					noStroke();
+					circle(pt.x, pt.y, scaledRadius * 2);
+				}
 				
 				// Inner circle with fixed radius at full opacity
 				fill(...stepColor.slice(0, 3), 255);
 				noStroke();
 				circle(pt.x, pt.y, baseRadius);
 			} else {
-				// Ray origin is outside this cone - show single circle with low opacity
-				fill(...stepColor.slice(0, 3), 100);
+				// Ray origin is outside this cone - show single circle with full opacity if tumbling windows off, low if on
+				const opacity = state.uiState.showTumblingWindows ? 100 : 255;
+				fill(...stepColor.slice(0, 3), opacity);
 				noStroke();
 				circle(pt.x, pt.y, baseRadius);
 			}
 		}
 	}
 
-	// Highlight the global max distance point
-	const globalMaxDistanceIndex = state.steppingData.globalMaxDistanceIndex;
-	if (globalMaxDistanceIndex >= 0 && globalMaxDistanceIndex < stepPoints.length) {
-		const globalMaxPt = stepPoints[globalMaxDistanceIndex];
-		if (globalMaxPt && globalMaxPt.x >= boxMinX && globalMaxPt.x <= boxMaxX && globalMaxPt.y >= boxMinY && globalMaxPt.y <= boxMaxY) {
-			// Draw a small bright dot in the center
-			fill(255, 0, 0, 255);
-			noStroke();
-			circle(globalMaxPt.x, globalMaxPt.y, 4);
+	// Highlight the global max distance point (only if tumbling windows are shown)
+	if (state.uiState.showTumblingWindows) {
+		const globalMaxDistanceIndex = state.steppingData.globalMaxDistanceIndex;
+		if (globalMaxDistanceIndex >= 0 && globalMaxDistanceIndex < stepPoints.length) {
+			const globalMaxPt = stepPoints[globalMaxDistanceIndex];
+			if (globalMaxPt && globalMaxPt.x >= boxMinX && globalMaxPt.x <= boxMaxX && globalMaxPt.y >= boxMinY && globalMaxPt.y <= boxMaxY) {
+				// Draw a small bright dot in the center
+				fill(255, 0, 0, 255);
+				noStroke();
+				circle(globalMaxPt.x, globalMaxPt.y, 4);
+			}
 		}
 	}
 
