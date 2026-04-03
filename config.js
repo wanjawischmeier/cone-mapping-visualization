@@ -10,6 +10,7 @@ export const defaultParams = {
 	heightmapSlopeStart: 0.7,
 	heightmapSlopeEnd: 0.0,
 	heightmapNoisePower: 0.3,
+	heightmapNoiseScale: 0.1,
 	coneMode: 'anisotropic', // 'isotropic' or 'anisotropic'
 	coneGenerationMode: 'conservative', // 'conservative' or 'exactRelaxed'
 	applyBilinearFix: true, // Apply post-process bilinear fix for robust stepping

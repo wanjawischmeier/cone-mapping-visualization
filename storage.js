@@ -15,6 +15,7 @@ export function saveState() {
         heightmapSlopeStart: params.heightmapSlopeStart,
         heightmapSlopeEnd: params.heightmapSlopeEnd,
         heightmapNoisePower: params.heightmapNoisePower,
+        heightmapNoiseScale: params.heightmapNoiseScale,
 
         // Heightmap and cone data
         heightmap: [...state.heightmap],
@@ -58,6 +59,7 @@ export function loadState() {
         if (data.heightmapSlopeStart !== undefined) params.heightmapSlopeStart = data.heightmapSlopeStart;
         if (data.heightmapSlopeEnd !== undefined) params.heightmapSlopeEnd = data.heightmapSlopeEnd;
         if (data.heightmapNoisePower !== undefined) params.heightmapNoisePower = data.heightmapNoisePower;
+        if (data.heightmapNoiseScale !== undefined) params.heightmapNoiseScale = data.heightmapNoiseScale;
         if (data.coneMode !== undefined) params.coneMode = data.coneMode;
         if (data.coneGenerationMode !== undefined) params.coneGenerationMode = data.coneGenerationMode;
         if (data.applyBilinearFix !== undefined) params.applyBilinearFix = data.applyBilinearFix;

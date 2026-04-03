@@ -22,4 +22,4 @@
   - [x] tumbling window disabled if cone stepping disabled
   - [x] hide distances when hiding tumbling
   - [x] Hovered cone only within view y
-- [ ] Smooth terrain generation
+- [x] Smooth terrain generation

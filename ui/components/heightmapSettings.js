@@ -4,7 +4,6 @@ import { drawCheckbox } from './checkbox.js';
 import { drawSlider } from './slider.js';
 import { drawButton } from './button.js';
 import { generateRandomHeightmap } from '../../heightmap.js';
-import { isMouseClicked } from '../inputEvents.js';
 import { colors } from '../../config.js';
 
 export function drawHeightmapSettings(x, y, contentWidth) {
@@ -21,10 +20,9 @@ export function drawHeightmapSettings(x, y, contentWidth) {
 	currentY += 20;
 	
 	// Generate Heightmap Button
-	if (isMouseClicked(x, currentY, contentWidth, 30)) {
+	if (drawButton("Generate Heightmap", x, currentY, contentWidth, 30)) {
 		generateRandomHeightmap();
 	}
-	drawButton("Generate Heightmap", x, currentY, contentWidth, 30);
 	currentY += 50;
 	
 	// Sliders for heightmap parameters
@@ -44,6 +42,10 @@ export function drawHeightmapSettings(x, y, contentWidth) {
 
 	currentY = drawSlider("Noise Power:", params.heightmapNoisePower, 0, 1, x, currentY, contentWidth, (val) => {
 		params.heightmapNoisePower = val;
+	}, generateRandomHeightmap);
+
+	currentY = drawSlider("Noise Smoothness:", params.heightmapNoiseScale, 0.01, 0.5, x, currentY, contentWidth, (val) => {
+		params.heightmapNoiseScale = val;
 	}, generateRandomHeightmap);
 	
 	return currentY + 20;

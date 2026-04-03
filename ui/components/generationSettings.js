@@ -26,10 +26,9 @@ export function drawGenerationSettings(x, y, contentWidth) {
 	currentY += 20;
 	
 	// Generate Heightmap Button
-	if (isMouseClicked(x, currentY, contentWidth, 30)) {
+	if (drawButton("Generate Heightmap", x, currentY, contentWidth, 30)) {
 		generateRandomHeightmap();
 	}
-	drawButton("Generate Heightmap", x, currentY, contentWidth, 30);
 	currentY += 50;
 	
 	// Generate Cone Map Button
@@ -117,6 +116,10 @@ export function drawGenerationSettings(x, y, contentWidth) {
 
 	currentY = drawSlider("Noise Power:", params.heightmapNoisePower, 0, 1, x, currentY, contentWidth, (val) => {
 		params.heightmapNoisePower = val;
+	}, generateRandomHeightmap);
+
+	currentY = drawSlider("Noise Smoothness:", params.heightmapNoiseScale, 0.01, 0.5, x, currentY, contentWidth, (val) => {
+		params.heightmapNoiseScale = val;
 	}, generateRandomHeightmap);
 	
 	return currentY + 20;

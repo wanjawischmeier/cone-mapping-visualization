@@ -61,6 +61,10 @@ export function drawParametersSection(x, y, contentWidth) {
 	currentY = drawSlider("Noise Power:", params.heightmapNoisePower, 0, 1, x, currentY, contentWidth, (val) => {
 		params.heightmapNoisePower = val;
 	}, () => { generateRandomHeightmap(); saveState(); });
+
+	currentY = drawSlider("Noise Smoothness:", params.heightmapNoiseScale, 0.01, 0.5, x, currentY, contentWidth, (val) => {
+		params.heightmapNoiseScale = val;
+	}, () => { generateRandomHeightmap(); saveState(); });
 	
 	return currentY;
 }
