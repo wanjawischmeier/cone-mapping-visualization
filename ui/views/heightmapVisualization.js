@@ -105,10 +105,13 @@ export function drawHeightmapVisualization() {
 	function updateHoveredIndexFromMouse(pointSpacing, viewHeight, viewWidth) {
 		// Account for the UI panel offset (already translated, so relative to visualization area)
 		const adjustedMouseX = mouseX - params.uiPanelWidth;
+		const adjustedMouseY = mouseY;
 
 		// Find closest point x-wise within the visualization area
 		const minX = params.sideViewPadding;
 		const maxX = params.sideViewPadding + viewWidth;
+		const minY = params.sideViewPadding;
+		const maxY = params.sideViewPadding + viewHeight;
 
 		state.hoveredIndex = -1;
 		state.hoveredX = -1;
@@ -118,7 +121,7 @@ export function drawHeightmapVisualization() {
 			const ptX = params.sideViewPadding + i * pointSpacing;
 			const dist = Math.abs(adjustedMouseX - ptX);
 
-			if (dist < closestDist && adjustedMouseX >= minX && adjustedMouseX <= maxX) {
+			if (dist < closestDist && adjustedMouseX >= minX && adjustedMouseX <= maxX && adjustedMouseY >= minY && adjustedMouseY <= maxY) {
 				closestDist = dist;
 				state.hoveredIndex = i;
 				state.hoveredX = adjustedMouseX; // Store actual hovered x position
