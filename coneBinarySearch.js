@@ -25,6 +25,8 @@ export function performBinarySearch() {
 	let upperY = t_fail.y;
 
 	const binarySearchSteps = [];
+	let globalMaxDistance = 0;
+	let globalMaxDistanceIndex = -1;
 
 	// Perform binary search iterations
 	for (let step = 0; step < params.binarySearchSteps; step++) {
@@ -32,12 +34,49 @@ export function performBinarySearch() {
 		const midX = (lowerX + upperX) / 2;
 		const midY = (lowerY + upperY) / 2;
 
-		// Store this step
-		binarySearchSteps.push({ x: midX, y: midY });
-
 		// Get cone and height at midpoint
 		const surfaceData = getHeightAndCone(midX, pointSpacing, viewHeight_canvas, scaleFactor);
 		const surfaceHeightCanvas = surfaceData.heightCanvas;
+
+		// Get screen slopes from the cone
+		const { pixelLeftSlope, pixelRightSlope } = surfaceData.cone.getScreenSlopes(
+			pointSpacing,
+			viewHeight_canvas,
+		);
+
+		// Compute distance from ray origin to this cone
+		const globalRay = new Ray(state.ray.x1, state.ray.y1, state.ray.x2, state.ray.y2);
+		const globalIntersection = globalRay.computeRayStep(
+			midX,
+			surfaceHeightCanvas,
+			pixelLeftSlope,
+			pixelRightSlope,
+			viewHeight_canvas,
+		);
+
+		const distanceToRayOrigin = globalIntersection ? getClosestPointOnCone(
+			midX,
+			surfaceHeightCanvas,
+			pixelLeftSlope,
+			pixelRightSlope,
+			state.ray.x1,
+			state.ray.y1,
+			viewHeight_canvas
+		).distance : null;
+
+		// Store this step with distance info
+		binarySearchSteps.push({ 
+			x: midX, 
+			y: midY, 
+			cone: surfaceData.cone,
+			distanceToRayOrigin 
+		});
+
+		// Track global max distance
+		if (distanceToRayOrigin !== null && distanceToRayOrigin > globalMaxDistance) {
+			globalMaxDistance = distanceToRayOrigin;
+			globalMaxDistanceIndex = binarySearchSteps.length - 1;
+		}
 
 		// Check if ray at midpoint is above or below surface
 		if (midY >= surfaceHeightCanvas) {
@@ -60,5 +99,7 @@ export function performBinarySearch() {
 	return {
 		binarySearchSteps,
 		finalSurfacePoint,
+		globalMaxDistance,
+		globalMaxDistanceIndex,
 	};
 }

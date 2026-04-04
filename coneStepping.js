@@ -33,6 +33,22 @@ export function performConeStepping() {
         scaleFactor,
     );
 
+    // Perform binary search if enabled
+    if (state.uiState.showBinarySearch) {
+        const binarySearchResult = performBinarySearch();
+        if (binarySearchResult) {
+            state.binarySearchData = binarySearchResult;
+            
+            // Update global max to include binary search points
+            if (binarySearchResult.globalMaxDistance > steppingResult.globalMaxDistance) {
+                steppingResult.globalMaxDistance = binarySearchResult.globalMaxDistance;
+                // Binary search steps are stored separately, so we note this in the stepping data
+            }
+        }
+    } else {
+        state.binarySearchData = { binarySearchSteps: [], finalSurfacePoint: null };
+    }
+
     // Store stepping data in state
     state.steppingData = {
         stepPoints: steppingResult.stepPoints,
@@ -45,18 +61,8 @@ export function performConeStepping() {
         tumblingWindowMaxima: steppingResult.tumblingWindowMaxima, // Rolling window maxima
         windowMaxIndices: steppingResult.windowMaxIndices, // Index of max distance point in each window
         globalMaxDistanceIndex: steppingResult.globalMaxDistanceIndex, // Index of global max distance point
-        globalMaxDistance: steppingResult.globalMaxDistance, // The global max distance value
+        globalMaxDistance: steppingResult.globalMaxDistance, // Updated to include binary search max
     };
-
-    // Perform binary search if enabled
-    if (state.uiState.showBinarySearch) {
-        const binarySearchResult = performBinarySearch();
-        if (binarySearchResult) {
-            state.binarySearchData = binarySearchResult;
-        }
-    } else {
-        state.binarySearchData = { binarySearchSteps: [], finalSurfacePoint: null };
-    }
 }
 
 // Perform stepping with proper termination at first surface hit

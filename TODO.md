@@ -25,8 +25,8 @@
   - [x] Hovered cone only within view y
   - [ ] Clip tumbling windows to visualization area
   - [x] Fix hide tumbling windows if disabled indirectly
-  - [ ] Legend
+  - [ ] (Legend)
 - [x] Smooth terrain generation
 - [x] Binary sorting
   - [ ] Add binary search steps to tumbling window
-- [ ] Error calculation
+- [ ] (Error calculation)
