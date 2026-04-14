@@ -39,15 +39,6 @@ export function drawControlPanel() {
 	// Calculate adjusted mouse Y for scrolled content
 	const adjustedMouseY = mouseY + state.uiScrollOffset;
 
-	// Draw title (always visible)
-	fill(colors.text);
-	noStroke();
-	textSize(14);
-	textAlign(LEFT);
-	textStyle(BOLD);
-	text("Cone Mapping Visualization", uiPanelX + 10, uiPanelY + 15);
-	textStyle(NORMAL);
-
 	// Use push/translate for the scrollable content
 	push();
 	translate(0, -state.uiScrollOffset);
@@ -78,4 +69,19 @@ export function drawControlPanel() {
 
 	// End scrollable section
 	pop();
+
+	// Draw title background (on top of scrollable content but doesn't scroll)
+	fill(colors.panelBackground);
+	stroke(colors.panelBorder);
+	strokeWeight(1);
+	rect(uiPanelX, uiPanelY, params.uiPanelWidth, PANEL_PADDING_TOP);
+
+	// Draw title text (always visible)
+	fill(colors.text);
+	noStroke();
+	textSize(14);
+	textAlign(LEFT);
+	textStyle(BOLD);
+	text("Cone Mapping Visualization", uiPanelX + 10, uiPanelY + 15);
+	textStyle(NORMAL);
 }

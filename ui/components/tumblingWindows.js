@@ -17,6 +17,8 @@ export function drawTumblingWindows(pointSpacing, viewHeight) {
     // Combine all points for visualization (cone stepping + binary search)
     const allPoints = [...stepPoints, ...binarySearchSteps];
 
+    console.log(`[DEBUG TW] stepPoints: ${stepPoints.length}, binarySearchSteps: ${binarySearchSteps.length}, allPoints: ${allPoints.length}`);
+
     const windowSize = state.tumblingWindowSize;
     const windowCount = state.tumblingWindowCount;
     const windowMaxIndices = state.steppingData.windowMaxIndices || Array(windowCount).fill(-1);
@@ -75,13 +77,19 @@ export function drawTumblingWindows(pointSpacing, viewHeight) {
         const windowStartIdx = windowStartStep + 1; // +1 to account for index 0 being the origin
         const windowEndIdx = Math.min(windowStartIdx + windowSize - 1, lastValidIndex);
 
+        console.log(`[DEBUG TW] Window ${n}: offset=${windowOffset.toFixed(1)}, totalSteps=${totalSteps}, phase=${currentPhase}, startStep=${windowStartStep}, startIdx=${windowStartIdx}, endIdx=${windowEndIdx}, lastValidIdx=${lastValidIndex}`);
+
         // Only draw if we have valid points in this window
         if (windowStartIdx >= 1 && windowStartIdx <= lastValidIndex && windowStartIdx < stepPoints.length) {
+            console.log(`[DEBUG TW] Window ${n} passed check 1`);
             // Ensure end index is valid
             const actualEndIdx = Math.min(windowEndIdx, lastValidIndex);
 
+            console.log(`[DEBUG TW] Window ${n} passed first check. actualEndIdx=${actualEndIdx}, have startPt=${!!allPoints[windowStartIdx]}, have endPt=${!!allPoints[actualEndIdx]}`);
+
             // Make sure we have valid points at both indices
             if (actualEndIdx < allPoints.length && allPoints[windowStartIdx] && allPoints[actualEndIdx]) {
+                console.log(`[DEBUG TW] Window ${n} drawing line from idx ${windowStartIdx} to ${actualEndIdx}`);
                 const startPt = allPoints[windowStartIdx];
                 const endPt = allPoints[actualEndIdx];
 
@@ -155,30 +163,36 @@ export function drawTumblingWindows(pointSpacing, viewHeight) {
                             }
                         }
                     }
+                } else {
+                    console.log(`[DEBUG TW] Window ${n} FAILED windowMaxIdx check: windowMaxIdx=${windowMaxIdx}, startIdx=${windowStartIdx}, actualEndIdx=${actualEndIdx}, allPoints[windowMaxIdx]=${!!allPoints[windowMaxIdx]}`);
                 }
+            } else {
+                console.log(`[DEBUG TW] Window ${n} FAILED point validity check: actualEndIdx(${actualEndIdx}) < allPoints.length(${allPoints.length})?${actualEndIdx < allPoints.length}, startPt=${!!allPoints[windowStartIdx]}, endPt=${!!allPoints[actualEndIdx]}`);
             }
-        }
-    }
-
-    // Helper function to draw a cone at a specific position
-    function drawConeAtPosition(coneX, cone, pointSpacing, viewHeight, color, boxMinX, boxMinY, boxMaxX, boxMaxY) {
-        const coneHeightY = cone.getScreenPosition(pointSpacing, viewHeight, params.sideViewPadding).y;
-        const { pixelLeftSlope, pixelRightSlope } = cone.getScreenSlopes(pointSpacing, viewHeight);
-
-        // Draw left cone edge
-        const leftEdge = clipLineToBox(coneX, coneHeightY, -1, -pixelLeftSlope, boxMinX, boxMinY, boxMaxX, boxMaxY);
-        if (leftEdge) {
-            stroke(...color);
-            strokeWeight(2);
-            line(leftEdge.startX, leftEdge.startY, leftEdge.endX, leftEdge.endY);
+        } else {
+            console.log(`[DEBUG TW] Window ${n} FAILED check 1: windowStartIdx(${windowStartIdx}) >= 1?${windowStartIdx >= 1}, windowStartIdx(${windowStartIdx}) <= lastValidIdx(${lastValidIndex})?${windowStartIdx <= lastValidIndex}, windowStartIdx(${windowStartIdx}) < stepPoints.length(${stepPoints.length})?${windowStartIdx < stepPoints.length}`);
         }
 
-        // Draw right cone edge
-        const rightEdge = clipLineToBox(coneX, coneHeightY, 1, -pixelRightSlope, boxMinX, boxMinY, boxMaxX, boxMaxY);
-        if (rightEdge) {
-            stroke(...color);
-            strokeWeight(2);
-            line(rightEdge.startX, rightEdge.startY, rightEdge.endX, rightEdge.endY);
+        // Helper function to draw a cone at a specific position
+        function drawConeAtPosition(coneX, cone, pointSpacing, viewHeight, color, boxMinX, boxMinY, boxMaxX, boxMaxY) {
+            const coneHeightY = cone.getScreenPosition(pointSpacing, viewHeight, params.sideViewPadding).y;
+            const { pixelLeftSlope, pixelRightSlope } = cone.getScreenSlopes(pointSpacing, viewHeight);
+
+            // Draw left cone edge
+            const leftEdge = clipLineToBox(coneX, coneHeightY, -1, -pixelLeftSlope, boxMinX, boxMinY, boxMaxX, boxMaxY);
+            if (leftEdge) {
+                stroke(...color);
+                strokeWeight(2);
+                line(leftEdge.startX, leftEdge.startY, leftEdge.endX, leftEdge.endY);
+            }
+
+            // Draw right cone edge
+            const rightEdge = clipLineToBox(coneX, coneHeightY, 1, -pixelRightSlope, boxMinX, boxMinY, boxMaxX, boxMaxY);
+            if (rightEdge) {
+                stroke(...color);
+                strokeWeight(2);
+                line(rightEdge.startX, rightEdge.startY, rightEdge.endX, rightEdge.endY);
+            }
         }
     }
 }

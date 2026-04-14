@@ -256,22 +256,34 @@ function performSteppingWithTermination(
             globalMaxDistance = distanceToRayOrigin;
             globalMaxDistanceIndex = stepPoints.length - 1; // Current point index
         }
+    }
 
-        // Update rolling window maxima (1-indexed, so step+1)
-        const stepIndex = step + 1;
-        for (let w = 0; w < windowCount; w++) {
-            // Each window is offset by (windowSize / windowCount) * w
-            const windowOffset = (windowSize / windowCount) * w;
-            const windowPhase = (stepIndex - windowOffset) % windowSize;
-            
-            // Update max when we're at the start of this window's phase
-            if (windowPhase === 0 && distanceToRayOrigin !== null) {
-                if (tumblingWindowMaxima[w] === null || distanceToRayOrigin > tumblingWindowMaxima[w]) {
-                    tumblingWindowMaxima[w] = distanceToRayOrigin;
-                    windowMaxIndices[w] = stepPoints.length - 1; // Index of max point in this window
+    // After stepping completes, calculate window maxima using the same window calculation as visualization
+    const totalSteps = stepPoints.length - 1; // Exclude origin point
+    for (let w = 0; w < windowCount; w++) {
+        const windowOffset = (windowSize / windowCount) * w;
+        const currentPhase = Math.floor((totalSteps - windowOffset) / windowSize);
+        const windowStartStep = Math.floor(currentPhase * windowSize + windowOffset);
+        const windowStartIdx = windowStartStep + 1; // +1 to account for origin
+        const windowEndIdx = Math.min(windowStartIdx + windowSize - 1, stepPoints.length - 1);
+
+        // Find max distance in this window's range
+        let maxDist = null;
+        let maxIdx = -1;
+        for (let idx = windowStartIdx; idx <= windowEndIdx; idx++) {
+            if (idx >= 0 && idx < stepPoints.length) {
+                const pt = stepPoints[idx];
+                if (pt && pt.distanceToRayOrigin !== null && pt.distanceToRayOrigin !== undefined) {
+                    if (maxDist === null || pt.distanceToRayOrigin > maxDist) {
+                        maxDist = pt.distanceToRayOrigin;
+                        maxIdx = idx;
+                    }
                 }
             }
         }
+        
+        tumblingWindowMaxima[w] = maxDist;
+        windowMaxIndices[w] = maxIdx;
     }
 
     return {

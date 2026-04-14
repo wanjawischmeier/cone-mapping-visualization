@@ -26,6 +26,7 @@
   - [ ] Clip tumbling windows to visualization area
   - [x] Fix hide tumbling windows if disabled indirectly
   - [ ] (Legend)
+  - [x] Fix header behind scrollable content
 - [x] Smooth terrain generation
 - [x] Binary sorting
   - [ ] Add binary search steps to tumbling window
